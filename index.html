@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Title Tag -->
+    <title>STL 在线打开与 3D 几何分析工具 | 免费 3D 打印模型在线查看器</title>
+
+    <!-- Meta Search & Keywords -->
+    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 边框制图模式、三维尺寸检测、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
+    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 黑神话悟空3D模型, 齐天大圣STL, 埃菲尔铁塔3D模型, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="STL 3D Online Viewer">
+    <link rel="canonical" href="http://localhost:8080/">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:url" content="http://localhost:8080/">
+    <meta property="og:title" content="STL 在线打开与 3D 几何分析工具 - 纯浏览器本地解析">
+    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 工程边框插画渲染模式、体积表面积计算。">
+    <meta property="og:site_name" content="STL 3D 在线查看器">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="STL 在线打开与 3D 几何分析工具">
+    <meta name="twitter:description" content="无需安装插件，在线快速打开与分析 STL 3D 几何模型。">
+
+    <!-- JSON-LD Structured Data for Search Engine Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "STL 在线打开与 3D 几何分析工具",
+      "alternateName": "STL Online 3D Viewer & Analyzer",
+      "url": "http://localhost:8080/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All (Web Browser)",
+      "browserRequirements": "Requires HTML5 WebGL support",
+      "description": "基于 WebGL 的免费 STL 在线打开与 3D 几何分析工具。支持二进制和 ASCII 格式 STL 文件的拖拽解析、体积表面积计算、3D 打印重量估算及空间测量。",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "《黑神话：悟空》齐天大圣大圣套件 3D 模型内置",
+        "巴黎埃菲尔铁塔等经典 3D 模型内置",
+        "CAD 工程边框/插画高清晰渲染模式",
+        "Binary 及 ASCII 格式 STL 拖拽即开",
+        "精准几何体积与表面积计算",
+        "PLA/ABS/PETG/树脂 3D 打印重量估算",
+        "全端离线本地解析，零隐私泄露风险"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Structured Data Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "如何在网页中在线打开 STL 3D 模型文件？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "只需直接将电脑中的 .stl 格式文件拖拽到网页任意区域，或点击顶部的'打开 STL 文件'按钮选择本地文件，本工具就会在浏览器中瞬间完成解析并呈现 3D 模型。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "如何切换为 CAD 边框制图/工程插画效果？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "在左侧控制面板的'渲染模式风格'下拉菜单中选择'CAD 工程边框 (CAD Technical Edges)'即可获得高对比度黑色轮廓线条与灰色阴影结合的经典工程制图效果。"
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js & OrbitControls Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Header Bar with H1 Heading for SEO -->
+        <header role="banner">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></div>
+                <div>
+                    <h1 class="logo-title">STL 3D 在线查看器</h1>
+                    <span class="logo-subtext">在线打开与 3D 几何分析工具</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn btn-outline" id="btn-toggle-seo-modal" title="查看 STL 工具说明与 FAQ">
+                    <i class="fa-solid fa-book-open"></i> 工具说明与 FAQ
+                </button>
+                <label for="file-input" class="btn btn-primary" aria-label="打开本地 STL 3D 模型文件">
+                    <i class="fa-solid fa-folder-open" aria-hidden="true"></i> 打开 STL 文件
+                </label>
+                <input type="file" id="file-input" accept=".stl" style="display: none;">
+
+                <button class="btn" id="btn-export-screenshot" title="导出高分辨率 PNG 截图" aria-label="导出截图">
+                    <i class="fa-solid fa-camera" aria-hidden="true"></i> 导出截图
+                </button>
+            </div>
+        </header>
+
+        <!-- Main 3D Viewport Workspace with Semantic Main Tag -->
+        <main id="workspace" role="main">
+            <!-- WebGL Canvas Container -->
+            <div id="canvas-container" aria-label="3D 模型渲染视口"></div>
+
+            <!-- Top Camera View Toolbar -->
+            <nav id="view-toolbar" class="floating-panel" aria-label="视角控制导航">
+                <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="轴测视角 (Isometric)" aria-label="轴测视角"><i class="fa-solid fa-arrows-up-to-line"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-front" title="正视图 (Front)" aria-label="正视图"><i class="fa-solid fa-square"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-top" title="顶视图 (Top)" aria-label="顶视图"><i class="fa-solid fa-border-all"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-right" title="右视图 (Right)" aria-label="右视图"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="复位视角 (Reset View)" aria-label="复位视角"><i class="fa-solid fa-rotate-left"></i></button>
+            </nav>
+
+            <!-- Left Panel: Controls, Materials & Lighting -->
+            <aside id="left-panel" class="floating-panel" aria-label="控制与显示设置">
+                <!-- Preset Samples -->
+                <section>
+                    <div class="panel-section-title">
+                        <span><i class="fa-solid fa-dragon" aria-hidden="true"></i> 《黑神话：悟空》与热门模型</span>
+                    </div>
+                    <div class="sample-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <button class="sample-item" id="sample-wukong" aria-label="载入黑神话齐天大圣战甲模型" style="border-color: var(--accent-amber); grid-column: span 2; background: rgba(245, 158, 11, 0.12);">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-amber);" aria-hidden="true"></i>
+                            <span style="color: #fef08a; font-weight: 700;">黑神话：齐天大圣 (大圣套件)</span>
+                        </button>
+                        <button class="sample-item" id="sample-eiffel" aria-label="载入巴黎埃菲尔铁塔">
+                            <i class="fa-solid fa-archway" style="color: var(--accent-cyan);" aria-hidden="true"></i>
+                            <span>巴黎埃菲尔铁塔</span>
+                        </button>
+                        <button class="sample-item" id="sample-pop-monster" aria-label="载入潮玩怪兽手办">
+                            <i class="fa-solid fa-ghost" style="color: var(--accent-rose);" aria-hidden="true"></i>
+                            <span>潮玩盲盒手办</span>
+                        </button>
+                        <button class="sample-item" id="sample-rocket" aria-label="载入重型航天火箭">
+                            <i class="fa-solid fa-rocket" aria-hidden="true"></i>
+                            <span>航天火箭</span>
+                        </button>
+                        <button class="sample-item" id="sample-gearbox" aria-label="载入行星齿轮减速机">
+                            <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                            <span>行星齿轮</span>
+                        </button>
+                    </div>
+                </section>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Render Mode Selector -->
+                <div class="control-group">
+                    <label for="render-mode-select" class="control-label" style="color: var(--accent-cyan); font-weight: 600;"><i class="fa-solid fa-pen-ruler"></i> 渲染模式风格</label>
+                    <select id="render-mode-select" class="control-input" style="border-color: var(--accent-cyan);">
+                        <option value="shaded">实体炫彩着色 (Solid Shaded)</option>
+                        <option value="cad">CAD 工程边框 (CAD Technical Edges)</option>
+                        <option value="xray">X 光半透明 (透视内部核心/灵石)</option>
+                        <option value="solid-wireframe">实体 + 线框 (Solid & Wireframe)</option>
+                        <option value="wireframe">网格线框 (Wireframe)</option>
+                        <option value="normal">表面法线颜色 (Normal Color)</option>
+                        <option value="points">顶点点云 (Point Cloud)</option>
+                    </select>
+                </div>
+
+                <!-- Color Selector -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <label for="model-color-picker"><i class="fa-solid fa-palette"></i> 模型材质颜色</label>
+                        <input type="color" id="model-color-picker" value="#3b82f6" aria-label="选择自定义颜色">
+                    </div>
+                    <div class="color-picker-row" style="margin-top: 6px;">
+                        <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="经典蓝色"></div>
+                        <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="科技青色"></div>
+                        <div class="color-dot" style="background: #10b981;" data-color="#10b981" title="翡翠绿色"></div>
+                        <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" title="琥珀金黄"></div>
+                        <div class="color-dot" style="background: #ef4444;" data-color="#ef4444" title="玫瑰红色"></div>
+                        <div class="color-dot" style="background: #8b5cf6;" data-color="#8b5cf6" title="紫色"></div>
+                        <div class="color-dot" style="background: #cbd5e1;" data-color="#cbd5e1" title="工程金属灰"></div>
+                    </div>
+                </div>
+
+                <!-- Environment & Lighting -->
+                <div class="control-group">
+                    <label for="lighting-preset-select" class="control-label"><i class="fa-solid fa-sun"></i> 光照预设</label>
+                    <select id="lighting-preset-select" class="control-input">
+                        <option value="studio">工作室标准 (Studio Standard)</option>
+                        <option value="bright">高亮明亮 (High Brightness)</option>
+                        <option value="cyberpunk">霓虹赛博 (Cyberpunk)</option>
+                        <option value="dramatic">强对比度 (Dramatic Shadow)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="bg-style-select" class="control-label"><i class="fa-solid fa-desktop"></i> 背景风格</label>
+                    <select id="bg-style-select" class="control-input">
+                        <option value="dark">深邃暗蓝 (Dark Slate - 适合黑神话展示)</option>
+                        <option value="black">纯黑模式 (Pure Black)</option>
+                        <option value="light">明亮极简 (Pure Light)</option>
+                        <option value="blueprint">工程蓝图 (Blueprint Blue)</option>
+                    </select>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Scene Toggles -->
+                <div class="toggle-row">
+                    <span><i class="fa-solid fa-border-none"></i> 显示地面网格 Grid</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-grid" checked aria-label="切换地面网格">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span><i class="fa-solid fa-arrows-to-dot"></i> 显示 XYZ 坐标轴</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-axes" checked aria-label="切换坐标轴">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span><i class="fa-solid fa-vector-square"></i> 显示包围盒 Bounding Box</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-bbox" aria-label="切换包围盒">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span><i class="fa-solid fa-rotate"></i> 360° 自动旋转</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-autorotate" aria-label="切换自动旋转">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </aside>
+
+            <!-- Right Panel: Geometry Stats & Analytics Tools -->
+            <aside id="right-panel" class="floating-panel" aria-label="模型数据分析与测量">
+                <!-- File Name Badge -->
+                <div>
+                    <div class="panel-section-title">
+                        <span><i class="fa-solid fa-circle-info" aria-hidden="true"></i> 模型属性与几何分析</span>
+                    </div>
+                    <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan); word-break: break-all; margin-bottom: 12px;" id="file-info-name">
+                        black_myth_wukong_official.stl
+                    </div>
+                </div>
+
+                <!-- Bounding Box Dimensions -->
+                <div>
+                    <div class="control-label" style="margin-bottom: 6px;">三维外轮廓尺寸 (Bounding Box)</div>
+                    <div class="dim-grid">
+                        <div class="dim-card">
+                            <span class="dim-tag tag-x">X 轴</span>
+                            <div class="stat-val" id="stat-size-x">0.00 mm</div>
+                        </div>
+                        <div class="dim-card">
+                            <span class="dim-tag tag-y">Y 轴</span>
+                            <div class="stat-val" id="stat-size-y">0.00 mm</div>
+                        </div>
+                        <div class="dim-card">
+                            <span class="dim-tag tag-z">Z 轴</span>
+                            <div class="stat-val" id="stat-size-z">0.00 mm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Grid -->
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">三角面片数 (Triangles)</div>
+                        <div class="stat-val" id="stat-triangles">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">顶点总数 (Vertices)</div>
+                        <div class="stat-val" id="stat-vertices">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">几何总体积 (Volume)</div>
+                        <div class="stat-val" id="stat-volume">0.00 cm³</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">总表面积 (Surface)</div>
+                        <div class="stat-val" id="stat-surface-area">0.00 cm²</div>
+                    </div>
+                </div>
+
+                <!-- 3D Print Material Weight Estimator -->
+                <div class="control-group" style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border);">
+                    <div class="control-label" style="margin-bottom: 8px;">
+                        <span><i class="fa-solid fa-weight-hanging" aria-hidden="true"></i> 3D 打印预估重量</span>
+                        <span id="stat-weight" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-amber);">0.00 g</span>
+                    </div>
+                    <select id="material-density-select" class="control-input" aria-label="选择 3D 打印耗材材料">
+                        <option value="1.24">PLA 塑料 (1.24 g/cm³)</option>
+                        <option value="1.04">ABS 塑料 (1.04 g/cm³)</option>
+                        <option value="1.27">PETG 塑料 (1.27 g/cm³)</option>
+                        <option value="1.15">光敏树脂 Resin (1.15 g/cm³)</option>
+                        <option value="2.70">铝合金 Aluminum (2.70 g/cm³)</option>
+                        <option value="7.90">不锈钢 Stainless (7.90 g/cm³)</option>
+                    </select>
+                </div>
+
+                <div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card">
+                        <div class="stat-label">STL 编码格式</div>
+                        <div class="stat-val" id="stat-format" style="color: var(--text-main);">Binary</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">解析耗时</div>
+                        <div class="stat-val" id="stat-parse-time" style="color: var(--text-main);">0.0 ms</div>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Slicing / Clipping Plane Section -->
+                <section>
+                    <div class="panel-section-title">
+                        <span style="color: var(--accent-amber);"><i class="fa-solid fa-scissors" aria-hidden="true"></i> 剖面切割 (观看内部结构)</span>
+                    </div>
+
+                    <div class="toggle-row" style="margin-bottom: 8px;">
+                        <span>启用剖切平面 (Clipping)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-clipping" aria-label="启用剖切">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="control-group" id="clipping-controls" style="opacity: 0.5; pointer-events: none; transition: opacity 0.2s;">
+                        <label for="clip-axis-select" class="control-label">剖切轴向:</label>
+                        <select id="clip-axis-select" class="control-input" style="margin-bottom: 8px;">
+                            <option value="Y">Y 轴高度剖切 (Top Down)</option>
+                            <option value="X">X 轴左右剖切 (Left Right)</option>
+                            <option value="Z">Z 轴前后剖切 (Front Back)</option>
+                        </select>
+                        <label for="clip-offset" class="control-label">切割深度</label>
+                        <input type="range" id="clip-offset" min="0" max="100" value="100">
+                    </div>
+                </section>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Interactive Measurement Tool -->
+                <section>
+                    <div class="panel-section-title">
+                        <span><i class="fa-solid fa-ruler-combined" aria-hidden="true"></i> 3D 空间测距工具</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm" id="btn-toggle-measure" style="flex: 1;" aria-label="点击测量两点">
+                            <i class="fa-solid fa-location-crosshairs"></i> <span id="measure-btn-text">点击测量两点</span>
+                        </button>
+                        <button class="btn btn-sm" id="btn-clear-measure" title="清除标记" aria-label="清除测距标记">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Floating Measurement Display Banner -->
+            <div id="measure-info-box" role="status">
+                <i class="fa-solid fa-ruler" style="color: var(--accent-amber); margin-right: 8px;"></i>
+                两点间距: <span class="measure-text" id="measure-result-val">0.00 mm</span>
+            </div>
+
+            <!-- Drag and Drop Fullscreen Overlay -->
+            <div id="drop-zone" role="region" aria-label="文件拖拽区域">
+                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">释放鼠标以加载 STL 模型</h2>
+                <p style="color: var(--text-muted);">支持 Binary 及 ASCII 格式 STL 文件</p>
+            </div>
+
+            <!-- Loading Spinner Overlay -->
+            <div id="loading-spinner" role="status" aria-live="polite">
+                <div class="spinner"></div>
+                <div style="font-size: 15px; font-weight: 600; color: var(--text-main);">正在解析 3D 模型 geometry...</div>
+            </div>
+        </main>
+
+        <!-- SEO Content & FAQ Modal Overlay for Search Engine Indexing & User Guide -->
+        <div id="seo-modal" class="modal-overlay">
+            <div class="modal-card">
+                <button class="modal-close" id="btn-close-seo-modal" aria-label="关闭 modal"><i class="fa-solid fa-xmark"></i></button>
+
+                <article class="seo-article">
+                    <h2>STL 在线打开与 3D 几何分析工具指南</h2>
+                    <p class="seo-lead">
+                        本工具是一款专为 3D 打印爱好者、建筑设计师、手办收藏家、机械工程师及三维设计人员打造的免费 WebGL 在线 STL 文件查看与几何特征计算工具。
+                    </p>
+
+                    <h3>为什么选择本在线 STL 查看器？</h3>
+                    <ul>
+                        <li><strong>《黑神话：悟空》齐天大圣大圣套件模型：</strong> 完美还原《黑神话：悟空》官方齐天大圣形象，包含凤翅紫金冠、孔雀雉翎、双肩龙首护肩、锁子黄金甲、山文战裙与斜握如意金箍棒。</li>
+                        <li><strong>零安装与即开即用：</strong> 不需要安装 AutoCAD、SolidWorks 或 MeshLab 等重型软件，浏览器即可瞬间打开 3D 模型。</li>
+                        <li><strong>100% 数据隐私安全：</strong> 采用前端 JavaScript DataView 技术直接解析二进制/文本 STL 数据，完全在您的电脑本地内存中计算渲染，任何数据均不会上传服务器。</li>
+                        <li><strong>内部结构透视与剖切分析：</strong> 支持动态剖面切割 (Clipping Plane) 与 X 光透视模式，能清晰观察内部结构与壁厚。</li>
+                    </ul>
+
+                    <h3>常见问题解答 (FAQ)</h3>
+                    <section class="faq-list">
+                        <details class="faq-item" open>
+                            <summary><h4>如何在网页中在线打开 STL 3D 模型文件？</h4></summary>
+                            <p>只需直接将本地电脑中的 <code>.stl</code> 格式文件拖拽到本网页任意区域，或点击顶部导航栏的“打开 STL 文件”按钮选择文件，工具即可瞬间完成解析并在 3D 场景中呈现实体。</p>
+                        </details>
+
+                        <details class="faq-item">
+                            <summary><h4>如何在黑神话悟空模型中观看内部核心？</h4></summary>
+                            <p>只需在右侧面板开启“启用剖切平面 (Clipping)”，拖拽“切割深度”滑块，或者在渲染模式下拉框选择“X 光半透明”，即可直接观看大圣模型内部发光的青色灵石核心。</p>
+                        </details>
+                    </section>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Bindings -->
+    <script src="js/stlParser.js"></script>
+    <script src="js/samples.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- UI & SEO Modal Event Bindings -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // SEO Modal Controls
+            const seoModal = document.getElementById('seo-modal');
+            const openSeoBtn = document.getElementById('btn-toggle-seo-modal');
+            const closeSeoBtn = document.getElementById('btn-close-seo-modal');
+
+            openSeoBtn.addEventListener('click', () => seoModal.classList.add('active'));
+            closeSeoBtn.addEventListener('click', () => seoModal.classList.remove('active'));
+            seoModal.addEventListener('click', (e) => {
+                if (e.target === seoModal) seoModal.classList.remove('active');
+            });
+
+            // Sample Model Click Handlers (Wukong, Eiffel Tower, Pop Monster, Rocket, Gearbox)
+            document.getElementById('sample-wukong').addEventListener('click', () => appInstance.loadSample('wukong'));
+            document.getElementById('sample-eiffel').addEventListener('click', () => appInstance.loadSample('eiffel'));
+            document.getElementById('sample-pop-monster').addEventListener('click', () => appInstance.loadSample('pop-monster'));
+            document.getElementById('sample-rocket').addEventListener('click', () => appInstance.loadSample('rocket'));
+            document.getElementById('sample-gearbox').addEventListener('click', () => appInstance.loadSample('gearbox'));
+
+            // Render Mode Select
+            document.getElementById('render-mode-select').addEventListener('change', (e) => {
+                appInstance.setRenderMode(e.target.value);
+            });
+
+            // Color Picker
+            const colorPicker = document.getElementById('model-color-picker');
+            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const color = dot.getAttribute('data-color');
+                    colorPicker.value = color;
+                    appInstance.setModelColor(color);
+                });
+            });
+
+            // Lighting & Background Selectors
+            document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
+            document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
+
+            // Toggles
+            document.getElementById('toggle-grid').addEventListener('change', (e) => {
+                appInstance.gridHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-axes').addEventListener('change', (e) => {
+                appInstance.axesHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-bbox').addEventListener('change', (e) => {
+                if (appInstance.boundingBoxHelper) appInstance.boundingBoxHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-autorotate').addEventListener('change', (e) => {
+                appInstance.isAutoRotating = e.target.checked;
+            });
+
+            // Camera Presets
+            document.getElementById('btn-cam-iso').addEventListener('click', () => appInstance.setCameraView('iso'));
+            document.getElementById('btn-cam-front').addEventListener('click', () => appInstance.setCameraView('front'));
+            document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
+            document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
+            document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Screenshot Export
+            document.getElementById('btn-export-screenshot').addEventListener('click', () => appInstance.exportScreenshot());
+
+            // Material Density Selector
+            document.getElementById('material-density-select').addEventListener('change', () => appInstance.updateMaterialWeight());
+
+            // Clipping Controls
+            const clipToggle = document.getElementById('toggle-clipping');
+            const clipControlsGroup = document.getElementById('clipping-controls');
+            const clipAxisSelect = document.getElementById('clip-axis-select');
+            const clipOffsetSlider = document.getElementById('clip-offset');
+
+            const updateClippingState = () => {
+                const enabled = clipToggle.checked;
+                appInstance.clippingEnabled = enabled;
+                clipControlsGroup.style.opacity = enabled ? '1' : '0.5';
+                clipControlsGroup.style.pointerEvents = enabled ? 'auto' : 'none';
+
+                const axis = clipAxisSelect.value;
+                if (axis === 'Y') appInstance.clippingPlane.normal.set(0, -1, 0);
+                else if (axis === 'X') appInstance.clippingPlane.normal.set(-1, 0, 0);
+                else if (axis === 'Z') appInstance.clippingPlane.normal.set(0, 0, -1);
+
+                appInstance.clippingPlane.constant = parseFloat(clipOffsetSlider.value);
+                appInstance.setRenderMode(appInstance.currentRenderMode);
+            };
+
+            clipToggle.addEventListener('change', updateClippingState);
+            clipAxisSelect.addEventListener('change', updateClippingState);
+            clipOffsetSlider.addEventListener('input', () => {
+                appInstance.clippingPlane.constant = parseFloat(clipOffsetSlider.value);
+            });
+
+            // Measurement Tool
+            const measureBtn = document.getElementById('btn-toggle-measure');
+            const measureBtnText = document.getElementById('measure-btn-text');
+
+            measureBtn.addEventListener('click', () => {
+                appInstance.measureMode = !appInstance.measureMode;
+                if (appInstance.measureMode) {
+                    measureBtn.classList.add('btn-primary');
+                    measureBtnText.textContent = '点击 3D 模型表面选点';
+                } else {
+                    measureBtn.classList.remove('btn-primary');
+                    measureBtnText.textContent = '点击测量两点';
+                }
+            });
+
+            document.getElementById('btn-clear-measure').addEventListener('click', () => appInstance.clearMeasurement());
+        });
+    </script>
+</body>
+</html>
