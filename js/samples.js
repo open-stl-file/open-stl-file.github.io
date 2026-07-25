@@ -1,6 +1,7 @@
 /**
  * Preset sample models generator.
  * Features 3 models: Möbius Strip Sculpture, Temple of Heaven, and Mechanical Spur Gear.
+ * Supports English & Chinese localized model titles.
  */
 class SampleModels {
     /**
@@ -117,48 +118,43 @@ class SampleModels {
     }
 
     /**
-     * 1. 莫比乌斯环艺术雕塑 (Möbius Strip Sculpture)
+     * 1. Möbius Strip Sculpture
      */
     static getMobiusStrip() {
         const parts = [];
 
-        // Base Pedestal
         const base = new THREE.CylinderGeometry(14, 16, 3, 32);
         base.translate(0, 1.5, 0);
         parts.push({ geo: base, color: [0.15, 0.18, 0.22] });
 
-        // Parametric Mobius Ribbon Geometry
         const mobiusGeo = new THREE.TorusKnotGeometry(16, 4.5, 120, 24, 2, 3);
         mobiusGeo.center();
         mobiusGeo.translate(0, 22, 0);
 
-        parts.push({ geo: mobiusGeo, color: [0.06, 0.72, 0.85] }); // Cyan Metallic Art Ribbon
+        parts.push({ geo: mobiusGeo, color: [0.06, 0.72, 0.85] });
 
         const merged = this.mergeGeometriesWithColors(parts);
         merged.center();
 
+        const isZh = document.documentElement.lang.startsWith('zh');
         return {
-            name: "莫比乌斯环艺术雕塑 (Möbius Strip Sculpture)",
+            name: isZh ? "莫比乌斯环艺术雕塑 (Möbius Strip Sculpture)" : "Möbius Strip Sculpture",
             fileName: "mobius_strip_art.stl",
             buffer: this.geometryToBinarySTL(merged)
         };
     }
 
     /**
-     * 2. 北京天坛祈年殿 (Temple of Heaven - Hall of Prayer for Good Harvests)
-     * Recreates the 3-tiered marble altar, triple-tiered circular blue roofs, red columns, and gold finial.
+     * 2. Temple of Heaven
      */
     static getTempleOfHeaven() {
         const parts = [];
 
-        const MARBLE_WHITE = [0.92, 0.94, 0.96]; // 白玉圆坛
-        const IMPERIAL_RED = [0.85, 0.15, 0.15];  // 朱红柱身
-        const ROYAL_BLUE = [0.12, 0.35, 0.75];   // 琉璃蓝顶
-        const GOLD_FINIAL = [0.95, 0.78, 0.15];   // 鎏金宝顶
+        const MARBLE_WHITE = [0.92, 0.94, 0.96];
+        const IMPERIAL_RED = [0.85, 0.15, 0.15];
+        const ROYAL_BLUE = [0.12, 0.35, 0.75];
+        const GOLD_FINIAL = [0.95, 0.78, 0.15];
 
-        // ----------------------------------------------------
-        // 三层白玉圆坛基座 (3-Tiered Marble Altar Platform)
-        // ----------------------------------------------------
         const base1 = new THREE.CylinderGeometry(28, 30, 3.5, 32);
         base1.translate(0, 1.75, 0);
         const base2 = new THREE.CylinderGeometry(23, 25, 3.0, 32);
@@ -172,58 +168,43 @@ class SampleModels {
             { geo: base3, color: MARBLE_WHITE }
         );
 
-        // ----------------------------------------------------
-        // 第一层大殿与蓝琉璃屋檐 (Tier 1 Room & Roof)
-        // ----------------------------------------------------
         const room1 = new THREE.CylinderGeometry(14, 15, 7, 24);
         room1.translate(0, 12.5, 0);
         const eaves1 = new THREE.ConeGeometry(22, 5, 24);
         eaves1.translate(0, 17, 0);
-
         parts.push({ geo: room1, color: IMPERIAL_RED }, { geo: eaves1, color: ROYAL_BLUE });
 
-        // ----------------------------------------------------
-        // 第二层大殿与蓝琉璃屋檐 (Tier 2 Room & Roof)
-        // ----------------------------------------------------
         const room2 = new THREE.CylinderGeometry(11, 12, 6, 24);
         room2.translate(0, 21, 0);
         const eaves2 = new THREE.ConeGeometry(17, 4.5, 24);
         eaves2.translate(0, 25, 0);
-
         parts.push({ geo: room2, color: IMPERIAL_RED }, { geo: eaves2, color: ROYAL_BLUE });
 
-        // ----------------------------------------------------
-        // 第三层顶殿与圆顶屋檐 (Tier 3 Room & Conical Roof)
-        // ----------------------------------------------------
         const room3 = new THREE.CylinderGeometry(8, 8.5, 5, 24);
         room3.translate(0, 28.5, 0);
         const eaves3 = new THREE.ConeGeometry(12, 6, 24);
         eaves3.translate(0, 33, 0);
-
         parts.push({ geo: room3, color: IMPERIAL_RED }, { geo: eaves3, color: ROYAL_BLUE });
 
-        // ----------------------------------------------------
-        // 殿顶鎏金宝顶 (Top Gold Finial)
-        // ----------------------------------------------------
         const finialBase = new THREE.CylinderGeometry(2, 3, 2.5, 16);
         finialBase.translate(0, 37, 0);
         const finialSphere = new THREE.SphereGeometry(2.5, 16, 16);
         finialSphere.translate(0, 39.5, 0);
-
         parts.push({ geo: finialBase, color: GOLD_FINIAL }, { geo: finialSphere, color: GOLD_FINIAL });
 
         const merged = this.mergeGeometriesWithColors(parts);
         merged.center();
 
+        const isZh = document.documentElement.lang.startsWith('zh');
         return {
-            name: "北京天坛祈年殿 (Temple of Heaven)",
+            name: isZh ? "北京天坛祈年殿 (Temple of Heaven)" : "Temple of Heaven (Beijing)",
             fileName: "temple_of_heaven_beijing.stl",
             buffer: this.geometryToBinarySTL(merged)
         };
     }
 
     /**
-     * 3. 工业精密齿轮 (Mechanical Spur Gear)
+     * 3. Mechanical Spur Gear
      */
     static getMechanicalGear() {
         const shape = new THREE.Shape();
@@ -262,8 +243,9 @@ class SampleModels {
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         geometry.center();
 
+        const isZh = document.documentElement.lang.startsWith('zh');
         return {
-            name: "工业精密齿轮 (Mechanical Spur Gear)",
+            name: isZh ? "工业精密齿轮 (Mechanical Spur Gear)" : "Mechanical Spur Gear",
             fileName: "mechanical_gear_16t.stl",
             buffer: this.geometryToBinarySTL(geometry)
         };
