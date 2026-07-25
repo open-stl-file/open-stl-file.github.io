@@ -50,8 +50,8 @@ class STLViewerApp {
         this.initGridAndAxes();
         this.initEventListeners();
 
-        // 恢复最早开局默认展示的模型: 工业精密齿轮 (Mechanical Gear)
-        this.loadSample('gear');
+        // 默认初始化展示模型: 北京天坛祈年殿
+        this.loadSample('temple');
 
         // Animation Loop
         this.animate = this.animate.bind(this);
@@ -563,22 +563,16 @@ class STLViewerApp {
     }
 
     /**
-     * Loads preset samples (Gear, Wukong, Eiffel Tower, Pop Monster, Rocket, Planetary Gearbox)
+     * Loads preset samples (Mobius, Temple of Heaven, Gear)
      */
     loadSample(sampleType) {
         let sample;
-        if (sampleType === 'gear') {
+        if (sampleType === 'mobius') {
+            sample = SampleModels.getMobiusStrip();
+        } else if (sampleType === 'temple') {
+            sample = SampleModels.getTempleOfHeaven();
+        } else if (sampleType === 'gear') {
             sample = SampleModels.getMechanicalGear();
-        } else if (sampleType === 'wukong') {
-            sample = SampleModels.getWukongFigurine();
-        } else if (sampleType === 'eiffel') {
-            sample = SampleModels.getEiffelTower();
-        } else if (sampleType === 'pop-monster') {
-            sample = SampleModels.getPopLabubuFigurine();
-        } else if (sampleType === 'rocket') {
-            sample = SampleModels.getSpaceRocket();
-        } else if (sampleType === 'gearbox') {
-            sample = SampleModels.getPlanetaryGearbox();
         }
 
         if (sample) {

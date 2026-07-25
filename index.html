@@ -8,8 +8,8 @@
     <title>STL 在线打开与 3D 几何分析工具 | 免费 3D 打印模型在线查看器</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 边框制图模式、三维尺寸检测、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
-    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 黑神话悟空3D模型, 齐天大圣STL, 埃菲尔铁塔3D模型, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
+    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮、CAD 边框制图模式、三维尺寸检测、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
+    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 莫比乌斯环3D模型, 北京天坛3D模型, 工业齿轮STL, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Viewer">
     <link rel="canonical" href="http://localhost:8080/">
@@ -19,7 +19,7 @@
     <meta property="og:locale" content="zh_CN">
     <meta property="og:url" content="http://localhost:8080/">
     <meta property="og:title" content="STL 在线打开与 3D 几何分析工具 - 纯浏览器本地解析">
-    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 工程边框插画渲染模式、体积表面积计算。">
+    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮模型、CAD 工程边框插画渲染模式、体积表面积计算。">
     <meta property="og:site_name" content="STL 3D 在线查看器">
 
     <!-- Twitter Card Meta Tags -->
@@ -45,8 +45,9 @@
         "priceCurrency": "CNY"
       },
       "featureList": [
-        "《黑神话：悟空》齐天大圣大圣套件 3D 模型内置",
-        "巴黎埃菲尔铁塔等经典 3D 模型内置",
+        "莫比乌斯环雕塑 3D 模型",
+        "北京天坛祈年殿 3D 模型",
+        "工业精密齿轮 3D 模型",
         "CAD 工程边框/插画高清晰渲染模式",
         "Binary 及 ASCII 格式 STL 拖拽即开",
         "精准几何体积与表面积计算",
@@ -103,7 +104,7 @@
         <!-- Header Bar with H1 Heading for SEO -->
         <header role="banner">
             <div class="logo-area">
-                <div class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></div>
+                <div class="logo-icon"><i class="fa-solid fa-shapes" aria-hidden="true"></i></div>
                 <div>
                     <h1 class="logo-title">STL 3D 在线查看器</h1>
                     <span class="logo-subtext">在线打开与 3D 几何分析工具</span>
@@ -145,28 +146,20 @@
                 <!-- Preset Samples -->
                 <section>
                     <div class="panel-section-title">
-                        <span><i class="fa-solid fa-dragon" aria-hidden="true"></i> 《黑神话：悟空》与热门模型</span>
+                        <span><i class="fa-solid fa-layer-group" aria-hidden="true"></i> 精选展示 3D 模型</span>
                     </div>
-                    <div class="sample-grid" style="grid-template-columns: repeat(2, 1fr);">
-                        <button class="sample-item" id="sample-wukong" aria-label="载入黑神话齐天大圣战甲模型" style="border-color: var(--accent-amber); grid-column: span 2; background: rgba(245, 158, 11, 0.12);">
-                            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-amber);" aria-hidden="true"></i>
-                            <span style="color: #fef08a; font-weight: 700;">黑神话：齐天大圣 (大圣套件)</span>
+                    <div class="sample-grid" style="grid-template-columns: 1fr;">
+                        <button class="sample-item" id="sample-mobius" aria-label="载入莫比乌斯环雕塑">
+                            <i class="fa-solid fa-infinity" style="color: var(--accent-cyan);" aria-hidden="true"></i>
+                            <span style="font-weight: 600;">1. 莫比乌斯环雕塑 (Möbius Strip)</span>
                         </button>
-                        <button class="sample-item" id="sample-eiffel" aria-label="载入巴黎埃菲尔铁塔">
-                            <i class="fa-solid fa-archway" style="color: var(--accent-cyan);" aria-hidden="true"></i>
-                            <span>巴黎埃菲尔铁塔</span>
+                        <button class="sample-item" id="sample-temple" aria-label="载入北京天坛祈年殿" style="border-color: var(--accent-amber); background: rgba(245, 158, 11, 0.1);">
+                            <i class="fa-solid fa-landmark-domed" style="color: var(--accent-amber);" aria-hidden="true"></i>
+                            <span style="color: #fef08a; font-weight: 700;">2. 北京天坛祈年殿 (Temple of Heaven)</span>
                         </button>
-                        <button class="sample-item" id="sample-pop-monster" aria-label="载入潮玩怪兽手办">
-                            <i class="fa-solid fa-ghost" style="color: var(--accent-rose);" aria-hidden="true"></i>
-                            <span>潮玩盲盒手办</span>
-                        </button>
-                        <button class="sample-item" id="sample-rocket" aria-label="载入重型航天火箭">
-                            <i class="fa-solid fa-rocket" aria-hidden="true"></i>
-                            <span>航天火箭</span>
-                        </button>
-                        <button class="sample-item" id="sample-gearbox" aria-label="载入行星齿轮减速机">
-                            <i class="fa-solid fa-gear" aria-hidden="true"></i>
-                            <span>行星齿轮</span>
+                        <button class="sample-item" id="sample-gear" aria-label="载入工业精密齿轮">
+                            <i class="fa-solid fa-gear" style="color: #94a3b8;" aria-hidden="true"></i>
+                            <span style="font-weight: 600;">3. 工业精密齿轮 (Spur Gear)</span>
                         </button>
                     </div>
                 </section>
@@ -179,7 +172,7 @@
                     <select id="render-mode-select" class="control-input" style="border-color: var(--accent-cyan);">
                         <option value="shaded">实体炫彩着色 (Solid Shaded)</option>
                         <option value="cad">CAD 工程边框 (CAD Technical Edges)</option>
-                        <option value="xray">X 光半透明 (透视内部核心/灵石)</option>
+                        <option value="xray">X 光半透明 (透视内部结构)</option>
                         <option value="solid-wireframe">实体 + 线框 (Solid & Wireframe)</option>
                         <option value="wireframe">网格线框 (Wireframe)</option>
                         <option value="normal">表面法线颜色 (Normal Color)</option>
@@ -218,7 +211,7 @@
                 <div class="control-group">
                     <label for="bg-style-select" class="control-label"><i class="fa-solid fa-desktop"></i> 背景风格</label>
                     <select id="bg-style-select" class="control-input">
-                        <option value="dark">深邃暗蓝 (Dark Slate - 适合黑神话展示)</option>
+                        <option value="dark">深邃暗蓝 (Dark Slate)</option>
                         <option value="black">纯黑模式 (Pure Black)</option>
                         <option value="light">明亮极简 (Pure Light)</option>
                         <option value="blueprint">工程蓝图 (Blueprint Blue)</option>
@@ -269,7 +262,7 @@
                         <span><i class="fa-solid fa-circle-info" aria-hidden="true"></i> 模型属性与几何分析</span>
                     </div>
                     <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan); word-break: break-all; margin-bottom: 12px;" id="file-info-name">
-                        black_myth_wukong_official.stl
+                        temple_of_heaven_beijing.stl
                     </div>
                 </div>
 
@@ -344,7 +337,7 @@
                 <!-- Slicing / Clipping Plane Section -->
                 <section>
                     <div class="panel-section-title">
-                        <span style="color: var(--accent-amber);"><i class="fa-solid fa-scissors" aria-hidden="true"></i> 剖面切割 (观看内部结构)</span>
+                        <span style="color: var(--accent-amber);"><i class="fa-solid fa-scissors" aria-hidden="true"></i> 剖面切割 (剖透内部结构)</span>
                     </div>
 
                     <div class="toggle-row" style="margin-bottom: 8px;">
@@ -413,15 +406,14 @@
                 <article class="seo-article">
                     <h2>STL 在线打开与 3D 几何分析工具指南</h2>
                     <p class="seo-lead">
-                        本工具是一款专为 3D 打印爱好者、建筑设计师、手办收藏家、机械工程师及三维设计人员打造的免费 WebGL 在线 STL 文件查看与几何特征计算工具。
+                        本工具是一款专为 3D 打印爱好者、建筑设计师、机械工程师及三维设计人员打造的免费 WebGL 在线 STL 文件查看与几何特征计算工具。
                     </p>
 
-                    <h3>为什么选择本在线 STL 查看器？</h3>
+                    <h3>精选三大展示模型</h3>
                     <ul>
-                        <li><strong>《黑神话：悟空》齐天大圣大圣套件模型：</strong> 完美还原《黑神话：悟空》官方齐天大圣形象，包含凤翅紫金冠、孔雀雉翎、双肩龙首护肩、锁子黄金甲、山文战裙与斜握如意金箍棒。</li>
-                        <li><strong>零安装与即开即用：</strong> 不需要安装 AutoCAD、SolidWorks 或 MeshLab 等重型软件，浏览器即可瞬间打开 3D 模型。</li>
-                        <li><strong>100% 数据隐私安全：</strong> 采用前端 JavaScript DataView 技术直接解析二进制/文本 STL 数据，完全在您的电脑本地内存中计算渲染，任何数据均不会上传服务器。</li>
-                        <li><strong>内部结构透视与剖切分析：</strong> 支持动态剖面切割 (Clipping Plane) 与 X 光透视模式，能清晰观察内部结构与壁厚。</li>
+                        <li><strong>莫比乌斯环雕塑 (Möbius Strip)：</strong> 具有单一曲面与边界的拓扑学几何体，展现现代三维艺术美感。</li>
+                        <li><strong>北京天坛祈年殿 (Temple of Heaven)：</strong> 中式古建筑代表作，包含三层白玉圆坛、朱红柱身与三层重檐蓝琉璃顶。</li>
+                        <li><strong>工业精密齿轮 (Mechanical Spur Gear)：</strong> 经典机械传动部件，适合 CAD 图纸与边框模式分析。</li>
                     </ul>
 
                     <h3>常见问题解答 (FAQ)</h3>
@@ -432,8 +424,8 @@
                         </details>
 
                         <details class="faq-item">
-                            <summary><h4>如何在黑神话悟空模型中观看内部核心？</h4></summary>
-                            <p>只需在右侧面板开启“启用剖切平面 (Clipping)”，拖拽“切割深度”滑块，或者在渲染模式下拉框选择“X 光半透明”，即可直接观看大圣模型内部发光的青色灵石核心。</p>
+                            <summary><h4>如何切换为 CAD 边框制图/工程插画效果？</h4></summary>
+                            <p>在左侧“渲染模式风格”下拉框中选择“CAD 工程边框 (CAD Technical Edges)”，并将“背景风格”设为“明亮极简”，即可瞬间获得清晰的高对比度 CAD 工程线框插画样式。</p>
                         </details>
                     </section>
                 </article>
@@ -460,12 +452,10 @@
                 if (e.target === seoModal) seoModal.classList.remove('active');
             });
 
-            // Sample Model Click Handlers (Wukong, Eiffel Tower, Pop Monster, Rocket, Gearbox)
-            document.getElementById('sample-wukong').addEventListener('click', () => appInstance.loadSample('wukong'));
-            document.getElementById('sample-eiffel').addEventListener('click', () => appInstance.loadSample('eiffel'));
-            document.getElementById('sample-pop-monster').addEventListener('click', () => appInstance.loadSample('pop-monster'));
-            document.getElementById('sample-rocket').addEventListener('click', () => appInstance.loadSample('rocket'));
-            document.getElementById('sample-gearbox').addEventListener('click', () => appInstance.loadSample('gearbox'));
+            // Sample Model Click Handlers (Mobius, Temple of Heaven, Mechanical Gear)
+            document.getElementById('sample-mobius').addEventListener('click', () => appInstance.loadSample('mobius'));
+            document.getElementById('sample-temple').addEventListener('click', () => appInstance.loadSample('temple'));
+            document.getElementById('sample-gear').addEventListener('click', () => appInstance.loadSample('gear'));
 
             // Render Mode Select
             document.getElementById('render-mode-select').addEventListener('change', (e) => {
