@@ -20,24 +20,34 @@ class STLParser {
 
     /**
      * Accurately determines whether the buffer is Binary or ASCII STL.
+     * Correctly identifies ASCII STL files even when they start with 'solid' + newlines.
      */
     static checkIsBinary(buffer) {
         if (buffer.byteLength < 84) return false;
+
         const reader = new DataView(buffer);
         const faceCount = reader.getUint32(80, true);
         const expectedBinarySize = 84 + faceCount * 50;
 
+        // Exact binary size match -> Definitely Binary
         if (expectedBinarySize === buffer.byteLength) {
             return true;
         }
 
-        const headerDecoder = new TextDecoder('ascii');
-        const headerText = headerDecoder.decode(new Uint8Array(buffer, 0, Math.min(80, buffer.byteLength)));
-        if (headerText.startsWith('solid') && !headerText.includes('\n')) {
-            const bytes = new Uint8Array(buffer, 0, Math.min(500, buffer.byteLength));
-            for (let i = 0; i < bytes.length; i++) {
-                if (bytes[i] > 127) return true;
+        // Sample up to 1024 bytes to test ASCII vs Binary content
+        const sampleSize = Math.min(1024, buffer.byteLength);
+        const bytes = new Uint8Array(buffer, 0, sampleSize);
+
+        let printableAsciiCount = 0;
+        for (let i = 0; i < sampleSize; i++) {
+            const b = bytes[i];
+            if (b === 9 || b === 10 || b === 13 || (b >= 32 && b <= 126)) {
+                printableAsciiCount++;
             }
+        }
+
+        // If > 85% of sample bytes are printable ASCII text, classify as ASCII STL
+        if (printableAsciiCount / sampleSize > 0.85) {
             return false;
         }
 
@@ -47,18 +57,19 @@ class STLParser {
     /**
      * Memory-Optimized Binary STL Parser.
      * Allocates colors array lazily only when vertex colors are actually detected.
+     * Caps faceCount by actual buffer size to prevent Giant Array Allocation crashes.
      */
     static parseBinary(buffer) {
         const reader = new DataView(buffer);
         const declaredFaceCount = reader.getUint32(80, true);
 
-        // Calculate maximum allowable triangles from buffer length to prevent memory corruption
+        // Calculate maximum allowable triangles from buffer length to prevent memory allocation crashes
         const maxPossibleFaces = Math.floor((buffer.byteLength - 84) / 50);
         const faceCount = Math.min(declaredFaceCount, maxPossibleFaces);
 
         const positions = new Float32Array(faceCount * 9);
         const normals = new Float32Array(faceCount * 9);
-        let colors = null; // Lazy allocation for colors
+        let colors = null;
         let hasColors = false;
 
         let posIdx = 0;
@@ -71,6 +82,8 @@ class STLParser {
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 
         for (let i = 0; i < faceCount; i++) {
+            if (offset + 50 > buffer.byteLength) break;
+
             // Normal
             const nx = reader.getFloat32(offset, true);
             const ny = reader.getFloat32(offset + 4, true);
@@ -149,8 +162,8 @@ class STLParser {
         }
 
         return {
-            positions,
-            normals,
+            positions: positions.subarray(0, posIdx),
+            normals: normals.subarray(0, posIdx),
             colors,
             stats: {
                 triangleCount: Math.floor(posIdx / 9),
@@ -171,7 +184,7 @@ class STLParser {
 
     /**
      * Memory-Optimized ASCII STL Parser.
-     * Uses zero intermediate string split arrays to parse large ASCII STL files cleanly.
+     * High-speed single-pass regex extraction into Float32Array without intermediate string arrays.
      */
     static parseASCII(buffer) {
         const textDecoder = new TextDecoder('utf-8');
@@ -249,7 +262,7 @@ class STLParser {
                     }
 
                     // Calculate Volume
-                    totalVolume += (-v3x * curV2y * curV1z + curV2x * curV3y * curV1z + v3x * curV1y * curV2z - curV1x * curV3y * curV2z - curV2x * curV1y * v3z + curV1x * curV2y * v3z) / 6.0;
+                    totalVolume += (-v3x * curV2y * curV1z + curV2x * v3y * curV1z + v3x * curV1y * curV2z - curV1x * v3y * curV2z - curV2x * curV1y * v3z + curV1x * curV2y * v3z) / 6.0;
 
                     // Calculate Surface Area
                     const ax = curV2x - curV1x, ay = curV2y - curV1y, az = curV2z - curV1z;
