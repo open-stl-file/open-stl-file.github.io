@@ -8,8 +8,8 @@
     <title>STL 在线打开与 3D 几何分析工具 | 免费 3D 打印模型在线查看器</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。提供三维尺寸检测、精准体积与表面积计算、3D 打印重量估算、剖切分析与空间测距功能。数据完全本地解析，保障隐私安全。">
-    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 3D模型在线打开, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
+    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 边框制图模式、三维尺寸检测、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
+    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 黑神话悟空3D模型, 齐天大圣STL, 埃菲尔铁塔3D模型, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Viewer">
     <link rel="canonical" href="http://localhost:8080/">
@@ -19,7 +19,7 @@
     <meta property="og:locale" content="zh_CN">
     <meta property="og:url" content="http://localhost:8080/">
     <meta property="og:title" content="STL 在线打开与 3D 几何分析工具 - 纯浏览器本地解析">
-    <meta property="og:description" content="免安装在线查看 STL 3D 模型，支持体积与表面积精确计算、3D 打印重量估算、空间距离测量及剖切分析。">
+    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供《黑神话：悟空》齐天大圣套件模型、埃菲尔铁塔、CAD 工程边框插画渲染模式、体积表面积计算。">
     <meta property="og:site_name" content="STL 3D 在线查看器">
 
     <!-- Twitter Card Meta Tags -->
@@ -45,11 +45,12 @@
         "priceCurrency": "CNY"
       },
       "featureList": [
+        "《黑神话：悟空》齐天大圣大圣套件 3D 模型内置",
+        "巴黎埃菲尔铁塔等经典 3D 模型内置",
+        "CAD 工程边框/插画高清晰渲染模式",
         "Binary 及 ASCII 格式 STL 拖拽即开",
         "精准几何体积与表面积计算",
         "PLA/ABS/PETG/树脂 3D 打印重量估算",
-        "三维空间点对点测距",
-        "X/Y/Z 轴向动态剖面切割",
         "全端离线本地解析，零隐私泄露风险"
       ]
     }
@@ -71,10 +72,10 @@
         },
         {
           "@type": "Question",
-          "name": "上传 STL 文件到本在线工具有泄露模型隐私的风险吗？",
+          "name": "如何切换为 CAD 边框制图/工程插画效果？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "完全没有风险。本工具基于纯前端 JavaScript 与 WebGL 渲染引擎，所有的 STL 文件解析、三维数据计算均完全运行在您的电脑浏览器本地，模型数据绝不会上传至任何远程服务器。"
+            "text": "在左侧控制面板的'渲染模式风格'下拉菜单中选择'CAD 工程边框 (CAD Technical Edges)'即可获得高对比度黑色轮廓线条与灰色阴影结合的经典工程制图效果。"
           }
         }
       ]
@@ -102,7 +103,7 @@
         <!-- Header Bar with H1 Heading for SEO -->
         <header role="banner">
             <div class="logo-area">
-                <div class="logo-icon"><i class="fa-solid fa-cube" aria-hidden="true"></i></div>
+                <div class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></div>
                 <div>
                     <h1 class="logo-title">STL 3D 在线查看器</h1>
                     <span class="logo-subtext">在线打开与 3D 几何分析工具</span>
@@ -144,35 +145,44 @@
                 <!-- Preset Samples -->
                 <section>
                     <div class="panel-section-title">
-                        <span><i class="fa-solid fa-shapes" aria-hidden="true"></i> 内置示例模型</span>
+                        <span><i class="fa-solid fa-dragon" aria-hidden="true"></i> 《黑神话：悟空》与热门模型</span>
                     </div>
-                    <div class="sample-grid">
-                        <button class="sample-item" id="sample-gear" aria-label="载入工业齿轮模型">
+                    <div class="sample-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <button class="sample-item" id="sample-wukong" aria-label="载入黑神话齐天大圣战甲模型" style="border-color: var(--accent-amber); grid-column: span 2; background: rgba(245, 158, 11, 0.12);">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-amber);" aria-hidden="true"></i>
+                            <span style="color: #fef08a; font-weight: 700;">黑神话：齐天大圣 (大圣套件)</span>
+                        </button>
+                        <button class="sample-item" id="sample-eiffel" aria-label="载入巴黎埃菲尔铁塔">
+                            <i class="fa-solid fa-archway" style="color: var(--accent-cyan);" aria-hidden="true"></i>
+                            <span>巴黎埃菲尔铁塔</span>
+                        </button>
+                        <button class="sample-item" id="sample-pop-monster" aria-label="载入潮玩怪兽手办">
+                            <i class="fa-solid fa-ghost" style="color: var(--accent-rose);" aria-hidden="true"></i>
+                            <span>潮玩盲盒手办</span>
+                        </button>
+                        <button class="sample-item" id="sample-rocket" aria-label="载入重型航天火箭">
+                            <i class="fa-solid fa-rocket" aria-hidden="true"></i>
+                            <span>航天火箭</span>
+                        </button>
+                        <button class="sample-item" id="sample-gearbox" aria-label="载入行星齿轮减速机">
                             <i class="fa-solid fa-gear" aria-hidden="true"></i>
-                            <span>工业齿轮</span>
-                        </button>
-                        <button class="sample-item" id="sample-cube" aria-label="载入校准方块模型">
-                            <i class="fa-solid fa-cubes" aria-hidden="true"></i>
-                            <span>校准方块</span>
-                        </button>
-                        <button class="sample-item" id="sample-torus" aria-label="载入环形雕塑模型">
-                            <i class="fa-solid fa-ring" aria-hidden="true"></i>
-                            <span>环形雕塑</span>
+                            <span>行星齿轮</span>
                         </button>
                     </div>
                 </section>
 
                 <hr style="border: 0; border-top: 1px solid var(--panel-border);">
 
-                <!-- Render Mode -->
+                <!-- Render Mode Selector -->
                 <div class="control-group">
-                    <label for="render-mode-select" class="control-label"><i class="fa-solid fa-eye"></i> 渲染模式</label>
-                    <select id="render-mode-select" class="control-input">
-                        <option value="shaded">实体着色 (Solid Shaded)</option>
-                        <option value="wireframe">网格线框 (Wireframe)</option>
+                    <label for="render-mode-select" class="control-label" style="color: var(--accent-cyan); font-weight: 600;"><i class="fa-solid fa-pen-ruler"></i> 渲染模式风格</label>
+                    <select id="render-mode-select" class="control-input" style="border-color: var(--accent-cyan);">
+                        <option value="shaded">实体炫彩着色 (Solid Shaded)</option>
+                        <option value="cad">CAD 工程边框 (CAD Technical Edges)</option>
+                        <option value="xray">X 光半透明 (透视内部核心/灵石)</option>
                         <option value="solid-wireframe">实体 + 线框 (Solid & Wireframe)</option>
+                        <option value="wireframe">网格线框 (Wireframe)</option>
                         <option value="normal">表面法线颜色 (Normal Color)</option>
-                        <option value="xray">X 光半透明 (X-Ray Physical)</option>
                         <option value="points">顶点点云 (Point Cloud)</option>
                     </select>
                 </div>
@@ -187,10 +197,10 @@
                         <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="经典蓝色"></div>
                         <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="科技青色"></div>
                         <div class="color-dot" style="background: #10b981;" data-color="#10b981" title="翡翠绿色"></div>
-                        <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" title="琥珀橙色"></div>
+                        <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" title="琥珀金黄"></div>
                         <div class="color-dot" style="background: #ef4444;" data-color="#ef4444" title="玫瑰红色"></div>
                         <div class="color-dot" style="background: #8b5cf6;" data-color="#8b5cf6" title="紫色"></div>
-                        <div class="color-dot" style="background: #94a3b8;" data-color="#94a3b8" title="金属灰色"></div>
+                        <div class="color-dot" style="background: #cbd5e1;" data-color="#cbd5e1" title="工程金属灰"></div>
                     </div>
                 </div>
 
@@ -208,7 +218,7 @@
                 <div class="control-group">
                     <label for="bg-style-select" class="control-label"><i class="fa-solid fa-desktop"></i> 背景风格</label>
                     <select id="bg-style-select" class="control-input">
-                        <option value="dark">深邃暗蓝 (Dark Slate)</option>
+                        <option value="dark">深邃暗蓝 (Dark Slate - 适合黑神话展示)</option>
                         <option value="black">纯黑模式 (Pure Black)</option>
                         <option value="light">明亮极简 (Pure Light)</option>
                         <option value="blueprint">工程蓝图 (Blueprint Blue)</option>
@@ -259,13 +269,13 @@
                         <span><i class="fa-solid fa-circle-info" aria-hidden="true"></i> 模型属性与几何分析</span>
                     </div>
                     <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan); word-break: break-all; margin-bottom: 12px;" id="file-info-name">
-                        mechanical_gear_16t.stl
+                        black_myth_wukong_official.stl
                     </div>
                 </div>
 
                 <!-- Bounding Box Dimensions -->
                 <div>
-                    <div class="control-label" style="margin-bottom: 6px;">三维外轮廓尺寸 (Dimensions)</div>
+                    <div class="control-label" style="margin-bottom: 6px;">三维外轮廓尺寸 (Bounding Box)</div>
                     <div class="dim-grid">
                         <div class="dim-card">
                             <span class="dim-tag tag-x">X 轴</span>
@@ -334,11 +344,11 @@
                 <!-- Slicing / Clipping Plane Section -->
                 <section>
                     <div class="panel-section-title">
-                        <span><i class="fa-solid fa-scissors" aria-hidden="true"></i> 动态剖切视角 (Clipping)</span>
+                        <span style="color: var(--accent-amber);"><i class="fa-solid fa-scissors" aria-hidden="true"></i> 剖面切割 (观看内部结构)</span>
                     </div>
 
                     <div class="toggle-row" style="margin-bottom: 8px;">
-                        <span>启用剖切平面</span>
+                        <span>启用剖切平面 (Clipping)</span>
                         <label class="switch">
                             <input type="checkbox" id="toggle-clipping" aria-label="启用剖切">
                             <span class="slider"></span>
@@ -403,15 +413,15 @@
                 <article class="seo-article">
                     <h2>STL 在线打开与 3D 几何分析工具指南</h2>
                     <p class="seo-lead">
-                        本工具是一款专为 3D 打印爱好者、机械工程师及三维设计人员打造的免费 WebGL 在线 STL 文件查看与几何特征计算工具。
+                        本工具是一款专为 3D 打印爱好者、建筑设计师、手办收藏家、机械工程师及三维设计人员打造的免费 WebGL 在线 STL 文件查看与几何特征计算工具。
                     </p>
 
                     <h3>为什么选择本在线 STL 查看器？</h3>
                     <ul>
+                        <li><strong>《黑神话：悟空》齐天大圣大圣套件模型：</strong> 完美还原《黑神话：悟空》官方齐天大圣形象，包含凤翅紫金冠、孔雀雉翎、双肩龙首护肩、锁子黄金甲、山文战裙与斜握如意金箍棒。</li>
                         <li><strong>零安装与即开即用：</strong> 不需要安装 AutoCAD、SolidWorks 或 MeshLab 等重型软件，浏览器即可瞬间打开 3D 模型。</li>
                         <li><strong>100% 数据隐私安全：</strong> 采用前端 JavaScript DataView 技术直接解析二进制/文本 STL 数据，完全在您的电脑本地内存中计算渲染，任何数据均不会上传服务器。</li>
-                        <li><strong>高精度几何特征计算：</strong> 自动为您计算模型的包围盒尺寸（$X \times Y \times Z$）、高精度三维体积 ($cm^3$)、总表面积 ($cm^2$)，并提供 PLA、ABS、PETG、光敏树脂及金属材料的 3D 打印重量估算。</li>
-                        <li><strong>丰富的三维交互分析工具：</strong> 内置实体着色、网格线框、法线颜色、X光半透明渲染，提供三维空间点对点测距工具与 X/Y/Z 轴向剖面切割功能。</li>
+                        <li><strong>内部结构透视与剖切分析：</strong> 支持动态剖面切割 (Clipping Plane) 与 X 光透视模式，能清晰观察内部结构与壁厚。</li>
                     </ul>
 
                     <h3>常见问题解答 (FAQ)</h3>
@@ -422,8 +432,8 @@
                         </details>
 
                         <details class="faq-item">
-                            <summary><h4>本工具支持哪些 STL 编码格式？</h4></summary>
-                            <p>工具完美兼容 3D 打印与 CAD 导出中最常用的二进制 (Binary STL) 和文本格式 (ASCII STL)。</p>
+                            <summary><h4>如何在黑神话悟空模型中观看内部核心？</h4></summary>
+                            <p>只需在右侧面板开启“启用剖切平面 (Clipping)”，拖拽“切割深度”滑块，或者在渲染模式下拉框选择“X 光半透明”，即可直接观看大圣模型内部发光的青色灵石核心。</p>
                         </details>
                     </section>
                 </article>
@@ -450,10 +460,12 @@
                 if (e.target === seoModal) seoModal.classList.remove('active');
             });
 
-            // Sample Model Click Handlers
-            document.getElementById('sample-gear').addEventListener('click', () => appInstance.loadSample('gear'));
-            document.getElementById('sample-cube').addEventListener('click', () => appInstance.loadSample('cube'));
-            document.getElementById('sample-torus').addEventListener('click', () => appInstance.loadSample('torus'));
+            // Sample Model Click Handlers (Wukong, Eiffel Tower, Pop Monster, Rocket, Gearbox)
+            document.getElementById('sample-wukong').addEventListener('click', () => appInstance.loadSample('wukong'));
+            document.getElementById('sample-eiffel').addEventListener('click', () => appInstance.loadSample('eiffel'));
+            document.getElementById('sample-pop-monster').addEventListener('click', () => appInstance.loadSample('pop-monster'));
+            document.getElementById('sample-rocket').addEventListener('click', () => appInstance.loadSample('rocket'));
+            document.getElementById('sample-gearbox').addEventListener('click', () => appInstance.loadSample('gearbox'));
 
             // Render Mode Select
             document.getElementById('render-mode-select').addEventListener('change', (e) => {

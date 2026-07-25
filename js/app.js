@@ -12,6 +12,7 @@ class STLViewerApp {
         // Current loaded mesh objects
         this.currentMesh = null;
         this.wireframeMesh = null;
+        this.edgesMesh = null;
         this.pointsMesh = null;
         this.boundingBoxHelper = null;
         this.gridHelper = null;
@@ -49,7 +50,7 @@ class STLViewerApp {
         this.initGridAndAxes();
         this.initEventListeners();
 
-        // Load default initial sample model: 工业齿轮
+        // 恢复最早开局默认展示的模型: 工业精密齿轮 (Mechanical Gear)
         this.loadSample('gear');
 
         // Animation Loop
@@ -104,21 +105,21 @@ class STLViewerApp {
      * Set up lights
      */
     initLights() {
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
         this.scene.add(ambientLight);
 
-        const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.95);
         mainLight.position.set(100, 150, 100);
         mainLight.castShadow = true;
         mainLight.shadow.mapSize.width = 2048;
         mainLight.shadow.mapSize.height = 2048;
         this.scene.add(mainLight);
 
-        const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.4);
+        const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
         fillLight.position.set(-100, 50, -100);
         this.scene.add(fillLight);
 
-        const backLight = new THREE.DirectionalLight(0x818cf8, 0.3);
+        const backLight = new THREE.DirectionalLight(0x818cf8, 0.35);
         backLight.position.set(0, -100, 100);
         this.scene.add(backLight);
 
@@ -205,6 +206,7 @@ class STLViewerApp {
         // Remove old mesh objects
         if (this.currentMesh) this.scene.remove(this.currentMesh);
         if (this.wireframeMesh) this.scene.remove(this.wireframeMesh);
+        if (this.edgesMesh) this.scene.remove(this.edgesMesh);
         if (this.pointsMesh) this.scene.remove(this.pointsMesh);
         if (this.boundingBoxHelper) this.scene.remove(this.boundingBoxHelper);
 
@@ -214,8 +216,8 @@ class STLViewerApp {
         const material = new THREE.MeshStandardMaterial({
             color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
             vertexColors: hasVertexColors,
-            roughness: 0.35,
-            metalness: 0.25,
+            roughness: 0.3,
+            metalness: 0.3,
             side: THREE.DoubleSide,
             clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
         });
@@ -228,7 +230,7 @@ class STLViewerApp {
         // Wireframe mesh
         const wireframeGeo = new THREE.WireframeGeometry(geometry);
         const wireframeMat = new THREE.LineBasicMaterial({
-            color: 0x60a5fa,
+            color: 0x3b82f6,
             transparent: true,
             opacity: 0.6,
             clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
@@ -236,6 +238,17 @@ class STLViewerApp {
         this.wireframeMesh = new THREE.LineSegments(wireframeGeo, wireframeMat);
         this.wireframeMesh.visible = false;
         this.scene.add(this.wireframeMesh);
+
+        // Crisp CAD Edges Mesh
+        const edgesGeo = new THREE.EdgesGeometry(geometry, 25);
+        const edgesMat = new THREE.LineBasicMaterial({
+            color: 0x1e293b,
+            linewidth: 2,
+            clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
+        });
+        this.edgesMesh = new THREE.LineSegments(edgesGeo, edgesMat);
+        this.edgesMesh.visible = false;
+        this.scene.add(this.edgesMesh);
 
         // Points mesh
         const pointsMat = new THREE.PointsMaterial({
@@ -267,7 +280,7 @@ class STLViewerApp {
     }
 
     /**
-     * Sets render mode (shaded, wireframe, points, normal, xray, solid-wireframe)
+     * Sets render mode (shaded, cad, wireframe, points, normal, xray, solid-wireframe)
      */
     setRenderMode(mode) {
         this.currentRenderMode = mode;
@@ -275,6 +288,7 @@ class STLViewerApp {
 
         this.currentMesh.visible = true;
         this.wireframeMesh.visible = false;
+        if (this.edgesMesh) this.edgesMesh.visible = false;
         this.pointsMesh.visible = false;
 
         const clipPlanes = this.clippingEnabled ? [this.clippingPlane] : [];
@@ -285,11 +299,23 @@ class STLViewerApp {
                 this.currentMesh.material = new THREE.MeshStandardMaterial({
                     color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
                     vertexColors: hasVertexColors,
-                    roughness: 0.35,
-                    metalness: 0.25,
+                    roughness: 0.3,
+                    metalness: 0.3,
                     side: THREE.DoubleSide,
                     clippingPlanes: clipPlanes
                 });
+                break;
+            case 'cad':
+                this.currentMesh.material = new THREE.MeshStandardMaterial({
+                    color: hasVertexColors ? 0xffffff : new THREE.Color('#cbd5e1'),
+                    vertexColors: hasVertexColors,
+                    roughness: 0.5,
+                    metalness: 0.1,
+                    flatShading: true,
+                    side: THREE.DoubleSide,
+                    clippingPlanes: clipPlanes
+                });
+                if (this.edgesMesh) this.edgesMesh.visible = true;
                 break;
             case 'wireframe':
                 this.currentMesh.visible = false;
@@ -309,7 +335,7 @@ class STLViewerApp {
                 this.currentMesh.material = new THREE.MeshPhysicalMaterial({
                     color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
                     vertexColors: hasVertexColors,
-                    transmission: 0.85,
+                    transmission: 0.82,
                     opacity: 1,
                     transparent: true,
                     roughness: 0.1,
@@ -322,8 +348,8 @@ class STLViewerApp {
                 this.currentMesh.material = new THREE.MeshStandardMaterial({
                     color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
                     vertexColors: hasVertexColors,
-                    roughness: 0.4,
-                    metalness: 0.2,
+                    roughness: 0.35,
+                    metalness: 0.25,
                     side: THREE.DoubleSide,
                     clippingPlanes: clipPlanes
                 });
@@ -372,10 +398,10 @@ class STLViewerApp {
         const { ambientLight, mainLight, fillLight, backLight } = this.lights;
         switch (preset) {
             case 'studio':
-                ambientLight.intensity = 0.6;
-                mainLight.intensity = 0.8;
-                fillLight.intensity = 0.4;
-                backLight.intensity = 0.3;
+                ambientLight.intensity = 0.65;
+                mainLight.intensity = 0.95;
+                fillLight.intensity = 0.45;
+                backLight.intensity = 0.35;
                 mainLight.color.setHex(0xffffff);
                 break;
             case 'bright':
@@ -537,16 +563,22 @@ class STLViewerApp {
     }
 
     /**
-     * Loads preset samples
+     * Loads preset samples (Gear, Wukong, Eiffel Tower, Pop Monster, Rocket, Planetary Gearbox)
      */
     loadSample(sampleType) {
         let sample;
         if (sampleType === 'gear') {
             sample = SampleModels.getMechanicalGear();
-        } else if (sampleType === 'cube') {
-            sample = SampleModels.getCalibrationCube();
-        } else if (sampleType === 'torus') {
-            sample = SampleModels.getTorusKnot();
+        } else if (sampleType === 'wukong') {
+            sample = SampleModels.getWukongFigurine();
+        } else if (sampleType === 'eiffel') {
+            sample = SampleModels.getEiffelTower();
+        } else if (sampleType === 'pop-monster') {
+            sample = SampleModels.getPopLabubuFigurine();
+        } else if (sampleType === 'rocket') {
+            sample = SampleModels.getSpaceRocket();
+        } else if (sampleType === 'gearbox') {
+            sample = SampleModels.getPlanetaryGearbox();
         }
 
         if (sample) {
@@ -573,7 +605,7 @@ class STLViewerApp {
         if (!this.currentStats) return;
         const stats = this.currentStats;
 
-        document.getElementById('stat-format').textContent = stats.format;
+        document.getElementById('stat-format').textContent = stats.format + (stats.hasColors ? ' (RGB Color)' : '');
         document.getElementById('stat-triangles').textContent = stats.triangleCount.toLocaleString();
         document.getElementById('stat-vertices').textContent = stats.vertexCount.toLocaleString();
         document.getElementById('stat-parse-time').textContent = `${parseTimeMs} ms`;
@@ -692,6 +724,7 @@ class STLViewerApp {
         if (this.isAutoRotating && this.currentMesh) {
             this.currentMesh.rotation.y += 0.008;
             if (this.wireframeMesh) this.wireframeMesh.rotation.y += 0.008;
+            if (this.edgesMesh) this.edgesMesh.rotation.y += 0.008;
             if (this.pointsMesh) this.pointsMesh.rotation.y += 0.008;
             if (this.boundingBoxHelper) this.boundingBoxHelper.update();
         }
