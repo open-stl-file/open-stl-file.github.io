@@ -1,5 +1,6 @@
 /**
  * Main WebGL Application & STL Viewer Controller
+ * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  */
 class STLViewerApp {
     constructor() {
@@ -18,12 +19,14 @@ class STLViewerApp {
         this.gridHelper = null;
         this.axesHelper = null;
 
+        // Active Three.js BufferGeometry
+        this.currentGeometry = null;
+
         // Clipping Plane
         this.clippingPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 100);
         this.clippingEnabled = false;
 
-        // Materials
-        this.materials = {};
+        // Materials & Render Settings
         this.currentRenderMode = 'shaded';
         this.currentColor = '#3b82f6';
 
@@ -141,6 +144,43 @@ class STLViewerApp {
     }
 
     /**
+     * Disposes old 3D meshes, geometries, and materials to free V8 and WebGL RAM
+     */
+    disposeCurrentScene() {
+        if (this.currentMesh) {
+            this.scene.remove(this.currentMesh);
+            if (this.currentMesh.material) this.currentMesh.material.dispose();
+            this.currentMesh = null;
+        }
+        if (this.wireframeMesh) {
+            this.scene.remove(this.wireframeMesh);
+            if (this.wireframeMesh.geometry) this.wireframeMesh.geometry.dispose();
+            if (this.wireframeMesh.material) this.wireframeMesh.material.dispose();
+            this.wireframeMesh = null;
+        }
+        if (this.edgesMesh) {
+            this.scene.remove(this.edgesMesh);
+            if (this.edgesMesh.geometry) this.edgesMesh.geometry.dispose();
+            if (this.edgesMesh.material) this.edgesMesh.material.dispose();
+            this.edgesMesh = null;
+        }
+        if (this.pointsMesh) {
+            this.scene.remove(this.pointsMesh);
+            if (this.pointsMesh.geometry) this.pointsMesh.geometry.dispose();
+            if (this.pointsMesh.material) this.pointsMesh.material.dispose();
+            this.pointsMesh = null;
+        }
+        if (this.boundingBoxHelper) {
+            this.scene.remove(this.boundingBoxHelper);
+            this.boundingBoxHelper = null;
+        }
+        if (this.currentGeometry) {
+            this.currentGeometry.dispose();
+            this.currentGeometry = null;
+        }
+    }
+
+    /**
      * Loads STL file ArrayBuffer into the 3D scene
      */
     loadSTLBuffer(buffer, fileName = "model.stl") {
@@ -148,6 +188,8 @@ class STLViewerApp {
 
         setTimeout(() => {
             try {
+                this.disposeCurrentScene();
+
                 const startTime = performance.now();
                 const parseResult = STLParser.parse(buffer);
                 const parseTime = (performance.now() - startTime).toFixed(1);
@@ -155,7 +197,7 @@ class STLViewerApp {
                 this.currentFileName = fileName;
                 this.currentStats = parseResult.stats;
 
-                // Build Three.js Geometry
+                // Build Three.js BufferGeometry
                 const geometry = new THREE.BufferGeometry();
                 geometry.setAttribute('position', new THREE.BufferAttribute(parseResult.positions, 3));
 
@@ -181,8 +223,9 @@ class STLViewerApp {
                 const minY = geometry.boundingBox.min.y;
                 geometry.translate(0, -minY, 0);
 
-                // Re-compute stats after centering
                 geometry.computeBoundingBox();
+
+                this.currentGeometry = geometry;
 
                 this.renderGeometry(geometry);
                 this.updateUIStats(parseTime);
@@ -200,16 +243,9 @@ class STLViewerApp {
     }
 
     /**
-     * Renders the processed Three.js geometry with materials
+     * Renders processed Three.js geometry with lazy auxiliary meshes
      */
     renderGeometry(geometry) {
-        // Remove old mesh objects
-        if (this.currentMesh) this.scene.remove(this.currentMesh);
-        if (this.wireframeMesh) this.scene.remove(this.wireframeMesh);
-        if (this.edgesMesh) this.scene.remove(this.edgesMesh);
-        if (this.pointsMesh) this.scene.remove(this.pointsMesh);
-        if (this.boundingBoxHelper) this.scene.remove(this.boundingBoxHelper);
-
         const hasVertexColors = !!(geometry.attributes.color);
 
         // Standard Material
@@ -227,46 +263,12 @@ class STLViewerApp {
         this.currentMesh.receiveShadow = true;
         this.scene.add(this.currentMesh);
 
-        // Wireframe mesh
-        const wireframeGeo = new THREE.WireframeGeometry(geometry);
-        const wireframeMat = new THREE.LineBasicMaterial({
-            color: 0x3b82f6,
-            transparent: true,
-            opacity: 0.6,
-            clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
-        });
-        this.wireframeMesh = new THREE.LineSegments(wireframeGeo, wireframeMat);
-        this.wireframeMesh.visible = false;
-        this.scene.add(this.wireframeMesh);
-
-        // Crisp CAD Edges Mesh
-        const edgesGeo = new THREE.EdgesGeometry(geometry, 25);
-        const edgesMat = new THREE.LineBasicMaterial({
-            color: 0x1e293b,
-            linewidth: 2,
-            clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
-        });
-        this.edgesMesh = new THREE.LineSegments(edgesGeo, edgesMat);
-        this.edgesMesh.visible = false;
-        this.scene.add(this.edgesMesh);
-
-        // Points mesh
-        const pointsMat = new THREE.PointsMaterial({
-            color: 0x38bdf8,
-            size: 1.2,
-            sizeAttenuation: true
-        });
-        this.pointsMesh = new THREE.Points(geometry, pointsMat);
-        this.pointsMesh.visible = false;
-        this.scene.add(this.pointsMesh);
-
         // Bounding Box Helper
         this.boundingBoxHelper = new THREE.BoxHelper(this.currentMesh, 0xef4444);
         this.boundingBoxHelper.visible = document.getElementById('toggle-bbox').checked;
         this.scene.add(this.boundingBoxHelper);
 
         // Update clipping plane slider max range based on model height
-        geometry.computeBoundingBox();
         const height = geometry.boundingBox.max.y;
         const clipSlider = document.getElementById('clip-offset');
         if (clipSlider) {
@@ -280,6 +282,54 @@ class STLViewerApp {
     }
 
     /**
+     * Lazy creation of Wireframe mesh
+     */
+    ensureWireframeMesh() {
+        if (!this.wireframeMesh && this.currentGeometry) {
+            const wireframeGeo = new THREE.WireframeGeometry(this.currentGeometry);
+            const wireframeMat = new THREE.LineBasicMaterial({
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.6,
+                clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
+            });
+            this.wireframeMesh = new THREE.LineSegments(wireframeGeo, wireframeMat);
+            this.scene.add(this.wireframeMesh);
+        }
+    }
+
+    /**
+     * Lazy creation of CAD Edges mesh
+     */
+    ensureEdgesMesh() {
+        if (!this.edgesMesh && this.currentGeometry) {
+            const edgesGeo = new THREE.EdgesGeometry(this.currentGeometry, 25);
+            const edgesMat = new THREE.LineBasicMaterial({
+                color: 0x1e293b,
+                linewidth: 2,
+                clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
+            });
+            this.edgesMesh = new THREE.LineSegments(edgesGeo, edgesMat);
+            this.scene.add(this.edgesMesh);
+        }
+    }
+
+    /**
+     * Lazy creation of Points mesh
+     */
+    ensurePointsMesh() {
+        if (!this.pointsMesh && this.currentGeometry) {
+            const pointsMat = new THREE.PointsMaterial({
+                color: 0x38bdf8,
+                size: 1.2,
+                sizeAttenuation: true
+            });
+            this.pointsMesh = new THREE.Points(this.currentGeometry, pointsMat);
+            this.scene.add(this.pointsMesh);
+        }
+    }
+
+    /**
      * Sets render mode (shaded, cad, wireframe, points, normal, xray, solid-wireframe)
      */
     setRenderMode(mode) {
@@ -287,9 +337,9 @@ class STLViewerApp {
         if (!this.currentMesh) return;
 
         this.currentMesh.visible = true;
-        this.wireframeMesh.visible = false;
+        if (this.wireframeMesh) this.wireframeMesh.visible = false;
         if (this.edgesMesh) this.edgesMesh.visible = false;
-        this.pointsMesh.visible = false;
+        if (this.pointsMesh) this.pointsMesh.visible = false;
 
         const clipPlanes = this.clippingEnabled ? [this.clippingPlane] : [];
         const hasVertexColors = !!(this.currentMesh.geometry.attributes.color);
@@ -315,15 +365,18 @@ class STLViewerApp {
                     side: THREE.DoubleSide,
                     clippingPlanes: clipPlanes
                 });
+                this.ensureEdgesMesh();
                 if (this.edgesMesh) this.edgesMesh.visible = true;
                 break;
             case 'wireframe':
+                this.ensureWireframeMesh();
                 this.currentMesh.visible = false;
-                this.wireframeMesh.visible = true;
+                if (this.wireframeMesh) this.wireframeMesh.visible = true;
                 break;
             case 'points':
+                this.ensurePointsMesh();
                 this.currentMesh.visible = false;
-                this.pointsMesh.visible = true;
+                if (this.pointsMesh) this.pointsMesh.visible = true;
                 break;
             case 'normal':
                 this.currentMesh.material = new THREE.MeshNormalMaterial({
@@ -353,7 +406,8 @@ class STLViewerApp {
                     side: THREE.DoubleSide,
                     clippingPlanes: clipPlanes
                 });
-                this.wireframeMesh.visible = true;
+                this.ensureWireframeMesh();
+                if (this.wireframeMesh) this.wireframeMesh.visible = true;
                 break;
         }
     }
@@ -554,8 +608,16 @@ class STLViewerApp {
     }
 
     clearMeasurement() {
-        this.measureMarkers.forEach(m => this.scene.remove(m));
-        if (this.measureLine) this.scene.remove(this.measureLine);
+        this.measureMarkers.forEach(m => {
+            if (m.geometry) m.geometry.dispose();
+            if (m.material) m.material.dispose();
+            this.scene.remove(m);
+        });
+        if (this.measureLine) {
+            if (this.measureLine.geometry) this.measureLine.geometry.dispose();
+            if (this.measureLine.material) this.measureLine.material.dispose();
+            this.scene.remove(this.measureLine);
+        }
         this.measureMarkers = [];
         this.measurePoints = [];
         this.measureLine = null;

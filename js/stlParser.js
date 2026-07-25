@@ -1,6 +1,7 @@
 /**
- * STL Parser for Binary and ASCII STL files.
- * Calculates geometry, volume, surface area, bounding box, and 15-bit RGB face colors.
+ * High-Performance & Memory-Optimized STL Parser.
+ * Handles massive (30MB+ / 1,000,000+ triangles) Binary and ASCII STL files
+ * without triggering 'Array buffer allocation failed' memory errors.
  */
 class STLParser {
     /**
@@ -21,9 +22,8 @@ class STLParser {
      * Accurately determines whether the buffer is Binary or ASCII STL.
      */
     static checkIsBinary(buffer) {
-        const reader = new DataView(buffer);
         if (buffer.byteLength < 84) return false;
-
+        const reader = new DataView(buffer);
         const faceCount = reader.getUint32(80, true);
         const expectedBinarySize = 84 + faceCount * 50;
 
@@ -45,16 +45,20 @@ class STLParser {
     }
 
     /**
-     * Parses Binary STL format with 15-bit RGB Color support.
+     * Memory-Optimized Binary STL Parser.
+     * Allocates colors array lazily only when vertex colors are actually detected.
      */
     static parseBinary(buffer) {
         const reader = new DataView(buffer);
-        const faceCount = reader.getUint32(80, true);
+        const declaredFaceCount = reader.getUint32(80, true);
+
+        // Calculate maximum allowable triangles from buffer length to prevent memory corruption
+        const maxPossibleFaces = Math.floor((buffer.byteLength - 84) / 50);
+        const faceCount = Math.min(declaredFaceCount, maxPossibleFaces);
 
         const positions = new Float32Array(faceCount * 9);
         const normals = new Float32Array(faceCount * 9);
-        const colors = new Float32Array(faceCount * 9);
-
+        let colors = null; // Lazy allocation for colors
         let hasColors = false;
 
         let posIdx = 0;
@@ -67,8 +71,6 @@ class STLParser {
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 
         for (let i = 0; i < faceCount; i++) {
-            if (offset + 50 > buffer.byteLength) break;
-
             // Normal
             const nx = reader.getFloat32(offset, true);
             const ny = reader.getFloat32(offset + 4, true);
@@ -104,9 +106,12 @@ class STLParser {
                 normals[posIdx + k * 3 + 2] = nz;
             }
 
-            // Fill 15-bit RGB Colors if present
+            // Lazy allocate and fill 15-bit RGB Colors if present
             if (attrVal & 0x8000) {
-                hasColors = true;
+                if (!hasColors) {
+                    hasColors = true;
+                    colors = new Float32Array(faceCount * 9);
+                }
                 const r5 = (attrVal >> 10) & 0x1F;
                 const g5 = (attrVal >> 5) & 0x1F;
                 const b5 = attrVal & 0x1F;
@@ -146,7 +151,7 @@ class STLParser {
         return {
             positions,
             normals,
-            colors: hasColors ? colors : null,
+            colors,
             stats: {
                 triangleCount: Math.floor(posIdx / 9),
                 vertexCount: posIdx / 3,
@@ -165,17 +170,28 @@ class STLParser {
     }
 
     /**
-     * Parses ASCII STL format.
+     * Memory-Optimized ASCII STL Parser.
+     * Uses zero intermediate string split arrays to parse large ASCII STL files cleanly.
      */
     static parseASCII(buffer) {
         const textDecoder = new TextDecoder('utf-8');
         const text = textDecoder.decode(buffer);
 
-        const posList = [];
-        const normList = [];
+        // Fast count of 'vertex' keyword to allocate exact TypedArray upfront
+        let vertexMatchCount = 0;
+        let searchPos = 0;
+        while ((searchPos = text.indexOf('vertex', searchPos)) !== -1) {
+            vertexMatchCount++;
+            searchPos += 6;
+        }
 
-        const vertexRegex = /vertex\s+([\d.\-+eE]+)\s+([\d.\-+eE]+)\s+([\d.\-+eE]+)/gi;
-        const normalRegex = /facet\s+normal\s+([\d.\-+eE]+)\s+([\d.\-+eE]+)\s+([\d.\-+eE]+)/gi;
+        const triangleCount = Math.floor(vertexMatchCount / 3);
+        const positions = new Float32Array(triangleCount * 9);
+        const normals = new Float32Array(triangleCount * 9);
+
+        // High-speed Regex matching directly into TypedArray
+        const vertexPattern = /vertex\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)/gi;
+        const normalPattern = /facet\s+normal\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)\s+([-\+]?(?:\d*\.\d+|\d+)(?:[eE][-\+]?\d+)?)/gi;
 
         let totalVolume = 0;
         let totalArea = 0;
@@ -183,62 +199,81 @@ class STLParser {
         let minX = Infinity, minY = Infinity, minZ = Infinity;
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
 
-        const facets = text.split('endfacet');
-        let triangleCount = 0;
+        let posIdx = 0;
+        let vCountInTriangle = 0;
+        let curV1x = 0, curV1y = 0, curV1z = 0;
+        let curV2x = 0, curV2y = 0, curV2z = 0;
+        let curNx = 0, curNy = 0, curNz = 0;
 
-        for (let i = 0; i < facets.length; i++) {
-            const facet = facets[i];
-            if (!facet.includes('vertex')) continue;
+        // Reset regex indices
+        normalPattern.lastIndex = 0;
+        vertexPattern.lastIndex = 0;
 
-            normalRegex.lastIndex = 0;
-            const normMatch = normalRegex.exec(facet);
-            let nx = 0, ny = 0, nz = 0;
-            if (normMatch) {
-                nx = parseFloat(normMatch[1]);
-                ny = parseFloat(normMatch[2]);
-                nz = parseFloat(normMatch[3]);
-            }
+        let normMatch = normalPattern.exec(text);
+        let vertMatch;
 
-            vertexRegex.lastIndex = 0;
-            const v1 = vertexRegex.exec(facet);
-            const v2 = vertexRegex.exec(facet);
-            const v3 = vertexRegex.exec(facet);
+        while ((vertMatch = vertexPattern.exec(text)) !== null) {
+            const vx = parseFloat(vertMatch[1]);
+            const vy = parseFloat(vertMatch[2]);
+            const vz = parseFloat(vertMatch[3]);
 
-            if (v1 && v2 && v3) {
-                const v1x = parseFloat(v1[1]), v1y = parseFloat(v1[2]), v1z = parseFloat(v1[3]);
-                const v2x = parseFloat(v2[1]), v2y = parseFloat(v2[2]), v2z = parseFloat(v2[3]);
-                const v3x = parseFloat(v3[1]), v3y = parseFloat(v3[2]), v3z = parseFloat(v3[3]);
+            if (posIdx < positions.length) {
+                positions[posIdx] = vx;
+                positions[posIdx + 1] = vy;
+                positions[posIdx + 2] = vz;
 
-                posList.push(v1x, v1y, v1z, v2x, v2y, v2z, v3x, v3y, v3z);
-                normList.push(nx, ny, nz, nx, ny, nz, nx, ny, nz);
+                // Update Bounding Box
+                minX = Math.min(minX, vx); maxX = Math.max(maxX, vx);
+                minY = Math.min(minY, vy); maxY = Math.max(maxY, vy);
+                minZ = Math.min(minZ, vz); maxZ = Math.max(maxZ, vz);
 
-                triangleCount++;
+                if (vCountInTriangle === 0) {
+                    curV1x = vx; curV1y = vy; curV1z = vz;
+                    if (normMatch) {
+                        curNx = parseFloat(normMatch[1]);
+                        curNy = parseFloat(normMatch[2]);
+                        curNz = parseFloat(normMatch[3]);
+                        normMatch = normalPattern.exec(text);
+                    }
+                } else if (vCountInTriangle === 1) {
+                    curV2x = vx; curV2y = vy; curV2z = vz;
+                } else if (vCountInTriangle === 2) {
+                    const v3x = vx, v3y = vy, v3z = vz;
 
-                minX = Math.min(minX, v1x, v2x, v3x);
-                maxX = Math.max(maxX, v1x, v2x, v3x);
-                minY = Math.min(minY, v1y, v2y, v3y);
-                maxY = Math.max(maxY, v1y, v2y, v3y);
-                minZ = Math.min(minZ, v1z, v2z, v3z);
-                maxZ = Math.max(maxZ, v1z, v2z, v3z);
+                    // Fill Normals for 3 vertices
+                    const nBase = posIdx - 6;
+                    for (let k = 0; k < 3; k++) {
+                        normals[nBase + k * 3] = curNx;
+                        normals[nBase + k * 3 + 1] = curNy;
+                        normals[nBase + k * 3 + 2] = curNz;
+                    }
 
-                totalVolume += (-v3x * v2y * v1z + v2x * v3y * v1z + v3x * v1y * v2z - v1x * v3y * v2z - v2x * v1y * v3z + v1x * v2y * v3z) / 6.0;
+                    // Calculate Volume
+                    totalVolume += (-v3x * curV2y * curV1z + curV2x * curV3y * curV1z + v3x * curV1y * curV2z - curV1x * curV3y * curV2z - curV2x * curV1y * v3z + curV1x * curV2y * v3z) / 6.0;
 
-                const ax = v2x - v1x, ay = v2y - v1y, az = v2z - v1z;
-                const bx = v3x - v1x, by = v3y - v1y, bz = v3z - v1z;
-                const cx = ay * bz - az * by;
-                const cy = az * bx - ax * bz;
-                const cz = ax * by - ay * bx;
-                totalArea += 0.5 * Math.sqrt(cx * cx + cy * cy + cz * cz);
+                    // Calculate Surface Area
+                    const ax = curV2x - curV1x, ay = curV2y - curV1y, az = curV2z - curV1z;
+                    const bx = v3x - curV1x, by = v3y - curV1y, bz = v3z - curV1z;
+                    const cx = ay * bz - az * by;
+                    const cy = az * bx - ax * bz;
+                    const cz = ax * by - ay * bx;
+                    totalArea += 0.5 * Math.sqrt(cx * cx + cy * cy + cz * cz);
+                }
+
+                vCountInTriangle = (vCountInTriangle + 1) % 3;
+                posIdx += 3;
             }
         }
 
+        const actualTriangles = Math.floor(posIdx / 9);
+
         return {
-            positions: new Float32Array(posList),
-            normals: new Float32Array(normList),
+            positions: positions.subarray(0, posIdx),
+            normals: normals.subarray(0, posIdx),
             colors: null,
             stats: {
-                triangleCount,
-                vertexCount: triangleCount * 3,
+                triangleCount: actualTriangles,
+                vertexCount: actualTriangles * 3,
                 volume: Math.abs(totalVolume),
                 surfaceArea: totalArea,
                 boundingBox: {
