@@ -1,7 +1,5 @@
 /**
- * Preset sample models generator.
- * Features a detailed Black Myth Wukong model matching the user's reference image,
- * along with Eiffel Tower, Labubu Pop Monster, Cyber Rocket, and Planetary Gearbox.
+ * Preset sample models generator with hyper-authentic real-world architectural details.
  */
 class SampleModels {
     /**
@@ -18,7 +16,7 @@ class SampleModels {
             const pos = nonIndexed.getAttribute('position');
             const norm = nonIndexed.getAttribute('normal');
 
-            const [r, g, b] = color || [0.7, 0.7, 0.7];
+            const [r, g, b] = color || [0.72, 0.74, 0.78];
 
             for (let i = 0; i < pos.count; i++) {
                 posList.push(pos.getX(i), pos.getY(i), pos.getZ(i));
@@ -55,7 +53,7 @@ class SampleModels {
         const dataView = new DataView(arrayBuffer);
 
         // Write 80-byte header
-        const headerStr = "STL Online Viewer Black Myth Wukong - Generated Procedurally";
+        const headerStr = "STL Online Viewer Eiffel Tower Authentic Model - Generated Procedurally";
         for (let i = 0; i < 80; i++) {
             dataView.setUint8(i, i < headerStr.length ? headerStr.charCodeAt(i) : 32);
         }
@@ -118,65 +116,240 @@ class SampleModels {
     }
 
     /**
-     * 1. 《黑神话：悟空》齐天大圣完整战甲模型 (Black Myth Wukong Figurine - Matching Reference Image)
-     * Recreates Sun Wukong with Phoenix Crown, Peacock Feathers, Dragon Shoulder Armor, Layered Armor Skirt & Golden Rod.
+     * 1. 真实比例精细化: 法国巴黎埃菲尔铁塔 (Hyper-Authentic Real-World Eiffel Tower Model)
+     * Faithfully models the 4 flared lattice piers, grand arches, 1st & 2nd platform balconies,
+     * upper merged lattice spire, 3rd level observation hall, dome & beacon antenna.
+     */
+    static getEiffelTower() {
+        const parts = [];
+
+        // Realistic Eiffel Brown Metallic Palette
+        const EIFFEL_BRONZE = [0.45, 0.42, 0.4];     // 埃菲尔专用古铜棕褐色
+        const STEEL_TRUSS = [0.65, 0.62, 0.6];       // 桁架网格梁
+        const PLATFORM_DARK = [0.25, 0.23, 0.22];    // 观景台与基座
+        const GOLD_BEACON = [0.95, 0.8, 0.2];        // 塔顶大灯与避雷针
+
+        // ----------------------------------------------------
+        // 1. Concrete Pedestals (4 大独立混凝土基座)
+        // ----------------------------------------------------
+        const legCenters = [
+            { x: -18, z: -18, rotY: Math.PI / 4 },
+            { x: 18, z: -18, rotY: -Math.PI / 4 },
+            { x: -18, z: 18, rotY: (3 * Math.PI) / 4 },
+            { x: 18, z: 18, rotY: -(3 * Math.PI) / 4 }
+        ];
+
+        legCenters.forEach(leg => {
+            const pedestal = new THREE.BoxGeometry(7, 3, 7);
+            pedestal.translate(leg.x, 1.5, leg.z);
+            parts.push({ geo: pedestal, color: PLATFORM_DARK });
+        });
+
+        // ----------------------------------------------------
+        // 2. Base Tier: 4 Angled Flared Piers with Double Beams (第一层四大内倾斜桁架网格腿)
+        // ----------------------------------------------------
+        legCenters.forEach(leg => {
+            const sx = Math.sign(leg.x);
+            const sz = Math.sign(leg.z);
+
+            // Double Main Corner Beams per Leg
+            for (let offsetSide = -1.8; offsetSide <= 1.8; offsetSide += 3.6) {
+                const beamGeo = new THREE.CylinderGeometry(1.6, 2.5, 24, 4);
+                beamGeo.rotateY(leg.rotY);
+                beamGeo.rotateX(-sz * 0.32);
+                beamGeo.rotateZ(sx * 0.32);
+                beamGeo.translate(leg.x * 0.72 + (leg.z > 0 ? offsetSide * 0.4 : -offsetSide * 0.4), 13, leg.z * 0.72 + (leg.x > 0 ? -offsetSide * 0.4 : offsetSide * 0.4));
+                parts.push({ geo: beamGeo, color: EIFFEL_BRONZE });
+            }
+
+            // Cross Lattice Braces along each pier (腿身 X 交叉网格加固梁)
+            for (let h = 4; h <= 20; h += 4) {
+                const factor = 1 - h / 45;
+                const braceX = new THREE.BoxGeometry(0.6, 0.6, 6.5 * factor);
+                braceX.rotateY(leg.rotY + Math.PI / 4);
+                braceX.translate(leg.x * factor, h, leg.z * factor);
+
+                const braceY = new THREE.BoxGeometry(0.6, 0.6, 6.5 * factor);
+                braceY.rotateY(leg.rotY - Math.PI / 4);
+                braceY.translate(leg.x * factor, h, leg.z * factor);
+
+                parts.push({ geo: braceX, color: STEEL_TRUSS }, { geo: braceY, color: STEEL_TRUSS });
+            }
+        });
+
+        // ----------------------------------------------------
+        // 3. Grand Double-Curved Decorative Arches (四大底层半圆跨度拱门与双重拱券)
+        // ----------------------------------------------------
+        for (let i = 0; i < 4; i++) {
+            const angle = (i * Math.PI) / 2;
+
+            // Outer Structural Arch
+            const outerArch = new THREE.TorusGeometry(13.5, 1.4, 8, 20, Math.PI);
+            outerArch.rotateY(angle);
+            outerArch.translate(0, 13, 0);
+
+            // Inner Decorative Arch Frieze
+            const innerArch = new THREE.TorusGeometry(12.0, 0.8, 8, 20, Math.PI);
+            innerArch.rotateY(angle);
+            innerArch.translate(0, 13, 0);
+
+            parts.push({ geo: outerArch, color: EIFFEL_BRONZE }, { geo: innerArch, color: STEEL_TRUSS });
+        }
+
+        // ----------------------------------------------------
+        // 4. First Platform & Double Frieze Balcony (第一层双层观景大平台与栏杆 - 57m 比例)
+        // ----------------------------------------------------
+        const plat1Base = new THREE.BoxGeometry(30, 2.5, 30);
+        plat1Base.translate(0, 23.5, 0);
+
+        const plat1Frieze = new THREE.BoxGeometry(32, 1.2, 32);
+        plat1Frieze.translate(0, 25, 0);
+
+        // Balcony Railings & Pavilions
+        const plat1Railing = new THREE.BoxGeometry(32.8, 1.5, 32.8);
+        plat1Railing.translate(0, 26.2, 0);
+
+        parts.push(
+            { geo: plat1Base, color: PLATFORM_DARK },
+            { geo: plat1Frieze, color: EIFFEL_BRONZE },
+            { geo: plat1Railing, color: STEEL_TRUSS }
+        );
+
+        // ----------------------------------------------------
+        // 5. Middle Section: Tapered Legs & Dense Lattice Girders (第二层塔身 - 115m 比例)
+        // ----------------------------------------------------
+        const midLegs = new THREE.CylinderGeometry(8.5, 12.5, 26, 4);
+        midLegs.rotateY(Math.PI / 4);
+        midLegs.translate(0, 38.5, 0);
+        parts.push({ geo: midLegs, color: EIFFEL_BRONZE });
+
+        // Horizontal Lattice Truss Rings on Middle Section
+        for (let y = 28; y <= 50; y += 4.5) {
+            const w = 24 - (y - 25) * 0.55;
+            const trussRing = new THREE.BoxGeometry(w, 0.9, w);
+            trussRing.translate(0, y, 0);
+            parts.push({ geo: trussRing, color: STEEL_TRUSS });
+        }
+
+        // ----------------------------------------------------
+        // 6. Second Platform & Observation Deck (第二层露天双层观景台)
+        // ----------------------------------------------------
+        const plat2Base = new THREE.BoxGeometry(18, 2, 18);
+        plat2Base.translate(0, 52, 0);
+
+        const plat2Deck = new THREE.BoxGeometry(19.5, 1.0, 19.5);
+        plat2Deck.translate(0, 53.2, 0);
+
+        parts.push({ geo: plat2Base, color: PLATFORM_DARK }, { geo: plat2Deck, color: EIFFEL_BRONZE });
+
+        // ----------------------------------------------------
+        // 7. Upper Tower: Merged Slender Tapered Lattice Column (第三层高耸融合单塔 - 276m 比例)
+        // ----------------------------------------------------
+        const upperSpire = new THREE.CylinderGeometry(3.0, 8.2, 42, 4);
+        upperSpire.rotateY(Math.PI / 4);
+        upperSpire.translate(0, 74.5, 0);
+        parts.push({ geo: upperSpire, color: EIFFEL_BRONZE });
+
+        // 10 Dense Horizontal Truss Reinforcement Belts
+        for (let y = 55; y <= 94; y += 4) {
+            const w = 15 - (y - 54) * 0.3;
+            const belt = new THREE.BoxGeometry(w, 0.7, w);
+            belt.translate(0, y, 0);
+            parts.push({ geo: belt, color: STEEL_TRUSS });
+        }
+
+        // ----------------------------------------------------
+        // 8. Third Level Double-Deck Observation Hall (第三层双层室内观景大厅)
+        // ----------------------------------------------------
+        const hallLevel1 = new THREE.CylinderGeometry(4.2, 4.2, 3.5, 16);
+        hallLevel1.translate(0, 97, 0);
+
+        const hallLevel2 = new THREE.CylinderGeometry(3.5, 3.5, 3.0, 16);
+        hallLevel2.translate(0, 100, 0);
+
+        parts.push({ geo: hallLevel1, color: PLATFORM_DARK }, { geo: hallLevel2, color: EIFFEL_BRONZE });
+
+        // ----------------------------------------------------
+        // 9. Top Dome, Light Beacon & Antenna (顶尖灯塔、弧形圆顶与双重天线 - 330m 比例)
+        // ----------------------------------------------------
+        const topDome = new THREE.SphereGeometry(3.6, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+        topDome.translate(0, 101.5, 0);
+
+        // Light Beacon Dome (探照灯塔)
+        const beacon = new THREE.CylinderGeometry(1.8, 2.5, 4, 16);
+        beacon.translate(0, 104.5, 0);
+
+        // High Antenna Mast & Lightning Rod (避雷针主天线)
+        const mast = new THREE.CylinderGeometry(0.5, 1.2, 16, 12);
+        mast.translate(0, 114.5, 0);
+
+        const antennaTip = new THREE.SphereGeometry(1.0, 12, 12);
+        antennaTip.translate(0, 123, 0);
+
+        parts.push(
+            { geo: topDome, color: STEEL_TRUSS },
+            { geo: beacon, color: GOLD_BEACON },
+            { geo: mast, color: EIFFEL_BRONZE },
+            { geo: antennaTip, color: GOLD_BEACON }
+        );
+
+        const merged = this.mergeGeometriesWithColors(parts);
+        merged.center();
+
+        return {
+            name: "法国巴黎埃菲尔铁塔 (Real Eiffel Tower 330m Ratio)",
+            fileName: "eiffel_tower_authentic.stl",
+            buffer: this.geometryToBinarySTL(merged)
+        };
+    }
+
+    /**
+     * 2. 《黑神话：悟空》齐天大圣完整战甲模型 (Black Myth Wukong Figurine)
      */
     static getWukongFigurine() {
         const parts = [];
 
-        // Exact Palette matching user's Black Myth Wukong reference image
-        const BRONZE_GOLD = [0.85, 0.65, 0.25];   // 锁子黄金甲 / 金冠 / 龙首护肩
-        const DARK_ARMOR = [0.22, 0.2, 0.25];     // 山文甲胸甲 / 暗色皮甲
-        const RED_CLOTH = [0.65, 0.15, 0.15];     // 战裙红衬 / 绳结
-        const PEACOCK_GREEN = [0.1, 0.55, 0.4];  // 凤翅紫金冠 - 孔雀雉翎羽毛
-        const MONKEY_FUR = [0.55, 0.42, 0.3];    // 猴毛 / 面部美猴王毛发
-        const ROD_WOOD = [0.28, 0.2, 0.15];      // 如意金箍棒暗木色棍身
-        const CYAN_CORE = [0.05, 0.85, 0.95];    // 内部发光灵石核心 (透视/剖切可见)
+        const BRONZE_GOLD = [0.85, 0.65, 0.25];
+        const DARK_ARMOR = [0.22, 0.2, 0.25];
+        const RED_CLOTH = [0.65, 0.15, 0.15];
+        const PEACOCK_GREEN = [0.1, 0.55, 0.4];
+        const MONKEY_FUR = [0.55, 0.42, 0.3];
+        const ROD_WOOD = [0.28, 0.2, 0.15];
+        const CYAN_CORE = [0.05, 0.85, 0.95];
 
-        // Ornate Base Pedestal (祥云石雕底座)
         const pedestal = new THREE.CylinderGeometry(18, 22, 5, 24);
         pedestal.translate(0, 2.5, 0);
         parts.push({ geo: pedestal, color: DARK_ARMOR });
 
-        // Armored Boots & Legs (战靴与胫甲)
         const bootL = new THREE.CylinderGeometry(3.5, 2.8, 12, 16);
         bootL.translate(-5.5, 9, 0);
         const bootR = new THREE.CylinderGeometry(3.5, 2.8, 12, 16);
         bootR.translate(5.5, 9, 0);
         parts.push({ geo: bootL, color: BRONZE_GOLD }, { geo: bootR, color: BRONZE_GOLD });
 
-        // Layered Armor Skirt (战裙与腿裙 - 贴合参考图)
         const skirtOuter = new THREE.ConeGeometry(12, 16, 16, 1, true);
         skirtOuter.translate(0, 17, 0);
         const skirtInner = new THREE.ConeGeometry(11, 14, 16, 1, true);
         skirtInner.translate(0, 16, 0);
-
         parts.push({ geo: skirtOuter, color: BRONZE_GOLD }, { geo: skirtInner, color: RED_CLOTH });
 
-        // Main Mountain-Pattern Chest Armor (山文黄金锁子甲)
         const chestCuirass = new THREE.CylinderGeometry(8, 6.5, 14, 16);
         chestCuirass.translate(0, 26, 0);
         parts.push({ geo: chestCuirass, color: DARK_ARMOR });
 
-        // Breastplate Gold Plates & Red Tassel Ribbons (胸前金盘与红绳结)
         const plateL = new THREE.SphereGeometry(3, 12, 12);
         plateL.scale(1, 1, 0.4);
         plateL.translate(-3.5, 28, 6.5);
-
         const plateR = new THREE.SphereGeometry(3, 12, 12);
         plateR.scale(1, 1, 0.4);
         plateR.translate(3.5, 28, 6.5);
-
         const redRibbonNode = new THREE.TorusGeometry(3.5, 0.6, 8, 16);
         redRibbonNode.translate(0, 27, 7);
-
         parts.push({ geo: plateL, color: BRONZE_GOLD }, { geo: plateR, color: BRONZE_GOLD }, { geo: redRibbonNode, color: RED_CLOTH });
 
-        // Dragon Head Beast Shoulder Pauldrons (双肩龙首/兽面护肩 - 贴合参考图)
         const shoulderL = new THREE.SphereGeometry(5.5, 16, 16);
         shoulderL.scale(1.2, 0.8, 1.1);
         shoulderL.translate(-9, 31, 0);
-
         const hornL = new THREE.ConeGeometry(2, 6, 12);
         hornL.rotateZ(Math.PI / 4);
         hornL.translate(-12, 34, 0);
@@ -184,39 +357,32 @@ class SampleModels {
         const shoulderR = new THREE.SphereGeometry(5.5, 16, 16);
         shoulderR.scale(1.2, 0.8, 1.1);
         shoulderR.translate(9, 31, 0);
-
         const hornR = new THREE.ConeGeometry(2, 6, 12);
         hornR.rotateZ(-Math.PI / 4);
         hornR.translate(12, 34, 0);
 
         parts.push({ geo: shoulderL, color: BRONZE_GOLD }, { geo: hornL, color: BRONZE_GOLD }, { geo: shoulderR, color: BRONZE_GOLD }, { geo: hornR, color: BRONZE_GOLD });
 
-        // INTERNAL STRUCTURE: Inner Glowing Energy Core (内部灵石核心 - 剖切可见)
         const innerSkeleton = new THREE.CylinderGeometry(2, 2, 22, 12);
         innerSkeleton.translate(0, 24, 0);
         const innerCore = new THREE.SphereGeometry(4, 16, 16);
         innerCore.translate(0, 26, 0);
         parts.push({ geo: innerSkeleton, color: DARK_ARMOR }, { geo: innerCore, color: CYAN_CORE });
 
-        // Monkey King Head & Mane Fur (齐天大圣头部美猴王美发)
         const head = new THREE.SphereGeometry(7, 24, 24);
         head.translate(0, 39, 0);
         const maneCollar = new THREE.TorusGeometry(7.5, 1.8, 12, 24);
         maneCollar.rotateX(Math.PI / 2);
         maneCollar.translate(0, 36, 0);
-
         parts.push({ geo: head, color: MONKEY_FUR }, { geo: maneCollar, color: MONKEY_FUR });
 
-        // Phoenix Crown Filigree (凤翅紫金冠 - 金冠底座)
         const crownBase = new THREE.CylinderGeometry(5.5, 6.5, 4, 16);
         crownBase.translate(0, 43, 0);
         const crownRim = new THREE.TorusGeometry(6.5, 0.8, 12, 24);
         crownRim.rotateX(Math.PI / 2);
         crownRim.translate(0, 44, 0);
-
         parts.push({ geo: crownBase, color: BRONZE_GOLD }, { geo: crownRim, color: BRONZE_GOLD });
 
-        // Peacock Feather Plumes (凤翅紫金冠 - 孔雀雉翎 - 贴合参考图 2 根高耸绿雉羽)
         for (let side = -1; side <= 1; side += 2) {
             const plumeStem = new THREE.CylinderGeometry(0.5, 1.0, 18, 12);
             plumeStem.rotateZ(side * Math.PI / 12);
@@ -229,12 +395,10 @@ class SampleModels {
             parts.push({ geo: plumeStem, color: BRONZE_GOLD }, { geo: plumeTip, color: PEACOCK_GREEN });
         }
 
-        // Ruyi Jingu Bang (如意金箍棒 - 贴合参考图：右臂斜握持棒，棒身伸向斜下方)
         const rodShaft = new THREE.CylinderGeometry(1.2, 1.2, 70, 16);
         rodShaft.rotateZ(-Math.PI / 4);
         rodShaft.translate(-2, 20, 10);
 
-        // Dragon Carved Golden Caps on both ends of Jingu Bang (两端龙纹金箍)
         const capTop = new THREE.CylinderGeometry(2.2, 1.8, 8, 16);
         capTop.rotateZ(-Math.PI / 4);
         capTop.translate(22, 44, 10);
@@ -251,108 +415,6 @@ class SampleModels {
         return {
             name: "黑神话：齐天大圣 (Black Myth Wukong - Official Armor)",
             fileName: "black_myth_wukong_official.stl",
-            buffer: this.geometryToBinarySTL(merged)
-        };
-    }
-
-    /**
-     * 2. 巴黎埃菲尔铁塔 (Eiffel Tower Model)
-     */
-    static getEiffelTower() {
-        const parts = [];
-        const STEEL_GREY = [0.72, 0.74, 0.78];
-        const DARK_STEEL = [0.45, 0.48, 0.52];
-        const PLATFORM_GREY = [0.35, 0.38, 0.42];
-
-        const legPositions = [
-            { x: -16, z: -16, angle: Math.PI / 4 },
-            { x: 16, z: -16, angle: -Math.PI / 4 },
-            { x: -16, z: 16, angle: (3 * Math.PI) / 4 },
-            { x: 16, z: 16, angle: -(3 * Math.PI) / 4 }
-        ];
-
-        legPositions.forEach(pos => {
-            const legBeam = new THREE.CylinderGeometry(3.5, 5.5, 22, 4);
-            legBeam.rotateY(pos.angle);
-            legBeam.rotateX((pos.z > 0 ? -1 : 1) * 0.28);
-            legBeam.rotateZ((pos.x > 0 ? 1 : -1) * 0.28);
-            legBeam.translate(pos.x * 0.75, 10, pos.z * 0.75);
-
-            parts.push({ geo: legBeam, color: STEEL_GREY });
-
-            for (let h = 3; h <= 18; h += 4) {
-                const strut = new THREE.BoxGeometry(0.8, 0.8, 6);
-                strut.rotateY(pos.angle);
-                strut.translate(pos.x * (1 - h / 50), h, pos.z * (1 - h / 50));
-                parts.push({ geo: strut, color: DARK_STEEL });
-            }
-        });
-
-        for (let i = 0; i < 4; i++) {
-            const arch = new THREE.TorusGeometry(12, 1.2, 8, 16, Math.PI);
-            arch.rotateY((i * Math.PI) / 2);
-            arch.translate(0, 11, 0);
-            parts.push({ geo: arch, color: STEEL_GREY });
-        }
-
-        const plat1 = new THREE.BoxGeometry(26, 3, 26);
-        plat1.translate(0, 20, 0);
-        const plat1Lip = new THREE.BoxGeometry(28, 1, 28);
-        plat1Lip.translate(0, 21.5, 0);
-
-        parts.push({ geo: plat1, color: PLATFORM_GREY }, { geo: plat1Lip, color: STEEL_GREY });
-
-        const midTower = new THREE.CylinderGeometry(8, 11.5, 22, 4);
-        midTower.rotateY(Math.PI / 4);
-        midTower.translate(0, 32, 0);
-        parts.push({ geo: midTower, color: STEEL_GREY });
-
-        for (let y = 23; y <= 40; y += 4) {
-            const band = new THREE.BoxGeometry(17 - (y - 20) * 0.35, 0.8, 17 - (y - 20) * 0.35);
-            band.translate(0, y, 0);
-            parts.push({ geo: band, color: DARK_STEEL });
-        }
-
-        const plat2 = new THREE.BoxGeometry(16, 2.5, 16);
-        plat2.translate(0, 44, 0);
-        const plat2Lip = new THREE.BoxGeometry(17.5, 0.8, 17.5);
-        plat2Lip.translate(0, 45.2, 0);
-        parts.push({ geo: plat2, color: PLATFORM_GREY }, { geo: plat2Lip, color: STEEL_GREY });
-
-        const upperSpire = new THREE.CylinderGeometry(2.5, 7.5, 34, 4);
-        upperSpire.rotateY(Math.PI / 4);
-        upperSpire.translate(0, 63, 0);
-        parts.push({ geo: upperSpire, color: STEEL_GREY });
-
-        for (let y = 47; y <= 78; y += 5) {
-            const band = new THREE.BoxGeometry(11 - (y - 45) * 0.25, 0.6, 11 - (y - 45) * 0.25);
-            band.translate(0, y, 0);
-            parts.push({ geo: band, color: DARK_STEEL });
-        }
-
-        const topDome = new THREE.CylinderGeometry(3.2, 3.2, 4, 16);
-        topDome.translate(0, 81, 0);
-        const topCap = new THREE.SphereGeometry(3.4, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-        topCap.translate(0, 83, 0);
-
-        const antenna = new THREE.CylinderGeometry(0.5, 1.2, 12, 12);
-        antenna.translate(0, 90, 0);
-        const antennaTip = new THREE.SphereGeometry(0.8, 12, 12);
-        antennaTip.translate(0, 96.5, 0);
-
-        parts.push(
-            { geo: topDome, color: PLATFORM_GREY },
-            { geo: topCap, color: STEEL_GREY },
-            { geo: antenna, color: STEEL_GREY },
-            { geo: antennaTip, color: [0.95, 0.75, 0.15] }
-        );
-
-        const merged = this.mergeGeometriesWithColors(parts);
-        merged.center();
-
-        return {
-            name: "法国巴黎埃菲尔铁塔 (Eiffel Tower)",
-            fileName: "eiffel_tower_paris.stl",
             buffer: this.geometryToBinarySTL(merged)
         };
     }
