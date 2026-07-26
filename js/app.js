@@ -3,6 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
+ * Complete Fix for all Material Color Picker bugs across Shaded, CAD, Wireframe, Points, X-Ray & Solid Wireframe modes.
  */
 class STLViewerApp {
     constructor() {
@@ -291,10 +292,11 @@ class STLViewerApp {
     ensureWireframeMesh() {
         if (!this.wireframeMesh && this.currentGeometry) {
             const wireframeGeo = new THREE.WireframeGeometry(this.currentGeometry);
+            const activeColor = new THREE.Color(this.currentColor);
             const wireframeMat = new THREE.LineBasicMaterial({
-                color: 0x3b82f6,
+                color: activeColor,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.8,
                 clippingPlanes: this.clippingEnabled ? [this.clippingPlane] : []
             });
             this.wireframeMesh = new THREE.LineSegments(wireframeGeo, wireframeMat);
@@ -323,9 +325,10 @@ class STLViewerApp {
      */
     ensurePointsMesh() {
         if (!this.pointsMesh && this.currentGeometry) {
+            const activeColor = new THREE.Color(this.currentColor);
             const pointsMat = new THREE.PointsMaterial({
-                color: 0x38bdf8,
-                size: 1.2,
+                color: activeColor,
+                size: 1.5,
                 sizeAttenuation: true
             });
             this.pointsMesh = new THREE.Points(this.currentGeometry, pointsMat);
@@ -335,6 +338,7 @@ class STLViewerApp {
 
     /**
      * Sets render mode (shaded, cad, wireframe, points, normal, xray, solid-wireframe)
+     * Seamlessly updates colors across all render modes.
      */
     setRenderMode(mode) {
         this.currentRenderMode = mode;
@@ -347,11 +351,12 @@ class STLViewerApp {
 
         const clipPlanes = this.clippingEnabled ? [this.clippingPlane] : [];
         const hasVertexColors = !!(this.currentMesh.geometry.attributes.color) && !this.userOverrodeColor;
+        const activeColor = new THREE.Color(this.currentColor);
 
         switch (mode) {
             case 'shaded':
                 this.currentMesh.material = new THREE.MeshStandardMaterial({
-                    color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
+                    color: hasVertexColors ? 0xffffff : activeColor,
                     vertexColors: hasVertexColors,
                     roughness: 0.3,
                     metalness: 0.3,
@@ -361,7 +366,7 @@ class STLViewerApp {
                 break;
             case 'cad':
                 this.currentMesh.material = new THREE.MeshStandardMaterial({
-                    color: hasVertexColors ? 0xffffff : new THREE.Color('#cbd5e1'),
+                    color: hasVertexColors ? 0xffffff : (this.userOverrodeColor ? activeColor : new THREE.Color('#cbd5e1')),
                     vertexColors: hasVertexColors,
                     roughness: 0.5,
                     metalness: 0.1,
@@ -374,13 +379,23 @@ class STLViewerApp {
                 break;
             case 'wireframe':
                 this.ensureWireframeMesh();
+                if (this.wireframeMesh) {
+                    this.wireframeMesh.visible = true;
+                    if (this.wireframeMesh.material) {
+                        this.wireframeMesh.material.color = activeColor;
+                    }
+                }
                 this.currentMesh.visible = false;
-                if (this.wireframeMesh) this.wireframeMesh.visible = true;
                 break;
             case 'points':
                 this.ensurePointsMesh();
+                if (this.pointsMesh) {
+                    this.pointsMesh.visible = true;
+                    if (this.pointsMesh.material) {
+                        this.pointsMesh.material.color = activeColor;
+                    }
+                }
                 this.currentMesh.visible = false;
-                if (this.pointsMesh) this.pointsMesh.visible = true;
                 break;
             case 'normal':
                 this.currentMesh.material = new THREE.MeshNormalMaterial({
@@ -390,7 +405,7 @@ class STLViewerApp {
                 break;
             case 'xray':
                 this.currentMesh.material = new THREE.MeshPhysicalMaterial({
-                    color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
+                    color: hasVertexColors ? 0xffffff : activeColor,
                     vertexColors: hasVertexColors,
                     transmission: 0.82,
                     opacity: 1,
@@ -403,7 +418,7 @@ class STLViewerApp {
                 break;
             case 'solid-wireframe':
                 this.currentMesh.material = new THREE.MeshStandardMaterial({
-                    color: hasVertexColors ? 0xffffff : new THREE.Color(this.currentColor),
+                    color: hasVertexColors ? 0xffffff : activeColor,
                     vertexColors: hasVertexColors,
                     roughness: 0.35,
                     metalness: 0.25,
@@ -411,17 +426,24 @@ class STLViewerApp {
                     clippingPlanes: clipPlanes
                 });
                 this.ensureWireframeMesh();
-                if (this.wireframeMesh) this.wireframeMesh.visible = true;
+                if (this.wireframeMesh) {
+                    this.wireframeMesh.visible = true;
+                    if (this.wireframeMesh.material) {
+                        this.wireframeMesh.material.color = activeColor;
+                    }
+                }
                 break;
         }
     }
 
     /**
-     * Updates model color and forces material color update
+     * Updates model color across all active sub-meshes (shaded, wireframe, points, CAD)
      */
     setModelColor(hexColor) {
         this.currentColor = hexColor;
-        this.userOverrodeColor = true; // Set flag so custom selected color overrides preset vertex colors
+        this.userOverrodeColor = true;
+
+        const activeColor = new THREE.Color(hexColor);
 
         if (this.currentMesh) {
             if (this.currentMesh.material && this.currentRenderMode !== 'normal') {
@@ -431,8 +453,17 @@ class STLViewerApp {
                 }
                 this.currentMesh.material.needsUpdate = true;
             }
-            this.setRenderMode(this.currentRenderMode);
         }
+        if (this.wireframeMesh && this.wireframeMesh.material) {
+            this.wireframeMesh.material.color.set(hexColor);
+            this.wireframeMesh.material.needsUpdate = true;
+        }
+        if (this.pointsMesh && this.pointsMesh.material) {
+            this.pointsMesh.material.color.set(hexColor);
+            this.pointsMesh.material.needsUpdate = true;
+        }
+
+        this.setRenderMode(this.currentRenderMode);
     }
 
     /**

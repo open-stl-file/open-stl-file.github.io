@@ -439,7 +439,7 @@
                     <section class="faq-list">
                         <details class="faq-item" open>
                             <summary><h4>How to view 3D STL files online without installing software?</h4></summary>
-                            <p>Simply drag and drop your <code>.stl</code> file onto the web page, or click the 'Open STL File' button to select a local file. The model will render instantly in 3D.</p>
+                            <p>Simply drag and drop your <code>.stl</code> file onto the web page, or click the 'Open STL File' button to select a local file. The model will be rendered instantly using WebGL.</p>
                         </details>
 
                         <details class="faq-item">
@@ -481,14 +481,17 @@
                 appInstance.setRenderMode(e.target.value);
             });
 
-            // Color Picker
+            // Color Picker (bind both input and change for cross-browser responsiveness)
             const colorPicker = document.getElementById('model-color-picker');
-            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+                colorPicker.addEventListener('change', (e) => appInstance.setModelColor(e.target.value));
+            }
 
             document.querySelectorAll('.color-dot').forEach(dot => {
                 dot.addEventListener('click', () => {
                     const color = dot.getAttribute('data-color');
-                    colorPicker.value = color;
+                    if (colorPicker) colorPicker.value = color;
                     appInstance.setModelColor(color);
                 });
             });

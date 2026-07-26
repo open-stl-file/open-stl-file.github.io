@@ -238,7 +238,7 @@
                     </div>
                 </div>
 
-                <!-- Export Format Selector (Static Image & 360 Motion Video/GIF) -->
+                <!-- Export Format Selector -->
                 <div class="control-group">
                     <label for="export-format-select" class="control-label" style="color: var(--accent-amber); font-weight: 600;"><i class="fa-solid fa-film"></i> Output Image / Animation Format</label>
                     <select id="export-format-select" class="control-input" style="border-color: var(--accent-amber);">
@@ -389,12 +389,17 @@
             // Render Mode & Material Color
             document.getElementById('render-mode-select').addEventListener('change', (e) => appInstance.setRenderMode(e.target.value));
 
+            // Color Picker (bind both input and change for cross-browser responsiveness)
             const colorPicker = document.getElementById('model-color-picker');
-            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+                colorPicker.addEventListener('change', (e) => appInstance.setModelColor(e.target.value));
+            }
+
             document.querySelectorAll('.color-dot').forEach(dot => {
                 dot.addEventListener('click', () => {
                     const color = dot.getAttribute('data-color');
-                    colorPicker.value = color;
+                    if (colorPicker) colorPicker.value = color;
                     appInstance.setModelColor(color);
                 });
             });

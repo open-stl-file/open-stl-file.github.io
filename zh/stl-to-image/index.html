@@ -100,7 +100,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/aria/6.4.0/css/all.min.css">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../../style.css?v=100">
@@ -389,12 +389,17 @@
             // Render Mode & Material Color
             document.getElementById('render-mode-select').addEventListener('change', (e) => appInstance.setRenderMode(e.target.value));
 
+            // Color Picker (bind both input and change for cross-browser responsiveness)
             const colorPicker = document.getElementById('model-color-picker');
-            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+                colorPicker.addEventListener('change', (e) => appInstance.setModelColor(e.target.value));
+            }
+
             document.querySelectorAll('.color-dot').forEach(dot => {
                 dot.addEventListener('click', () => {
                     const color = dot.getAttribute('data-color');
-                    colorPicker.value = color;
+                    if (colorPicker) colorPicker.value = color;
                     appInstance.setModelColor(color);
                 });
             });
