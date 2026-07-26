@@ -1,6 +1,7 @@
 /**
  * Main WebGL Application & STL Viewer Controller
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
+ * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background).
  */
 class STLViewerApp {
     constructor() {
@@ -265,7 +266,7 @@ class STLViewerApp {
 
         // Bounding Box Helper
         this.boundingBoxHelper = new THREE.BoxHelper(this.currentMesh, 0xef4444);
-        this.boundingBoxHelper.visible = document.getElementById('toggle-bbox').checked;
+        this.boundingBoxHelper.visible = document.getElementById('toggle-bbox') ? document.getElementById('toggle-bbox').checked : false;
         this.scene.add(this.boundingBoxHelper);
 
         // Update clipping plane slider max range based on model height
@@ -595,14 +596,17 @@ class STLViewerApp {
                 const p2 = this.measurePoints[1];
                 const distance = p1.distanceTo(p2);
 
-                document.getElementById('measure-result-val').textContent = `${distance.toFixed(2)} mm`;
-                document.getElementById('measure-info-box').style.display = 'block';
+                const resElem = document.getElementById('measure-result-val');
+                if (resElem) resElem.textContent = `${distance.toFixed(2)} mm`;
+                const infoBox = document.getElementById('measure-info-box');
+                if (infoBox) infoBox.style.display = 'block';
             } else if (this.measurePoints.length > 2) {
                 // Reset for new measurement
                 this.clearMeasurement();
                 this.measureMarkers.push(marker);
                 this.measurePoints.push(point);
-                document.getElementById('measure-info-box').style.display = 'none';
+                const infoBox = document.getElementById('measure-info-box');
+                if (infoBox) infoBox.style.display = 'none';
             }
         }
     }
@@ -621,7 +625,8 @@ class STLViewerApp {
         this.measureMarkers = [];
         this.measurePoints = [];
         this.measureLine = null;
-        document.getElementById('measure-info-box').style.display = 'none';
+        const infoBox = document.getElementById('measure-info-box');
+        if (infoBox) infoBox.style.display = 'none';
     }
 
     /**
@@ -643,15 +648,67 @@ class STLViewerApp {
     }
 
     /**
-     * Export canvas to high-res PNG screenshot
+     * High-Resolution Image Export (PNG / JPG / WebP)
+     * Supports 4K, 1080p, Transparent background, and custom dimensions.
+     * @param {Object} options { width, height, format, bgTransparent }
      */
-    exportScreenshot() {
+    exportScreenshot(options = {}) {
+        const {
+            width = this.container.clientWidth,
+            height = this.container.clientHeight,
+            format = 'image/png',
+            bgTransparent = false,
+            filename = `stl_to_image_${(this.currentFileName || 'model').replace(/\.[^/.]+$/, "")}_${Date.now()}`
+        } = options;
+
+        const originalAspect = this.camera.aspect;
+        const originalSize = new THREE.Vector2();
+        this.renderer.getSize(originalSize);
+        const originalBg = this.scene.background;
+
+        if (bgTransparent) {
+            this.scene.background = null;
+        }
+
+        // Temporarily resize renderer for high-res output
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height, false);
+
+        // Hide helpers temporarily if requested
+        const gridVis = this.gridHelper ? this.gridHelper.visible : false;
+        const axesVis = this.axesHelper ? this.axesHelper.visible : false;
+        const bboxVis = this.boundingBoxHelper ? this.boundingBoxHelper.visible : false;
+
+        if (options.hideHelpers) {
+            if (this.gridHelper) this.gridHelper.visible = false;
+            if (this.axesHelper) this.axesHelper.visible = false;
+            if (this.boundingBoxHelper) this.boundingBoxHelper.visible = false;
+        }
+
         this.renderer.render(this.scene, this.camera);
-        const dataURL = this.renderer.domElement.toDataURL('image/png');
+        const dataURL = this.renderer.domElement.toDataURL(format);
+
+        // Restore state
+        if (options.hideHelpers) {
+            if (this.gridHelper) this.gridHelper.visible = gridVis;
+            if (this.axesHelper) this.axesHelper.visible = axesVis;
+            if (this.boundingBoxHelper) this.boundingBoxHelper.visible = bboxVis;
+        }
+
+        this.scene.background = originalBg;
+        this.camera.aspect = originalAspect;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(originalSize.x, originalSize.y, false);
+        this.renderer.render(this.scene, this.camera);
+
+        const ext = format === 'image/jpeg' ? 'jpg' : (format === 'image/webp' ? 'webp' : 'png');
         const link = document.createElement('a');
-        link.download = `stl_snapshot_${this.currentFileName || 'model'}_${Date.now()}.png`;
+        link.download = `${filename}.${ext}`;
         link.href = dataURL;
         link.click();
+
+        return dataURL;
     }
 
     /**
@@ -661,23 +718,32 @@ class STLViewerApp {
         if (!this.currentStats) return;
         const stats = this.currentStats;
 
-        document.getElementById('stat-format').textContent = stats.format + (stats.hasColors ? ' (RGB Color)' : '');
-        document.getElementById('stat-triangles').textContent = stats.triangleCount.toLocaleString();
-        document.getElementById('stat-vertices').textContent = stats.vertexCount.toLocaleString();
-        document.getElementById('stat-parse-time').textContent = `${parseTimeMs} ms`;
+        const fmtElem = document.getElementById('stat-format');
+        if (fmtElem) fmtElem.textContent = stats.format + (stats.hasColors ? ' (RGB Color)' : '');
+        const triElem = document.getElementById('stat-triangles');
+        if (triElem) triElem.textContent = stats.triangleCount.toLocaleString();
+        const vertElem = document.getElementById('stat-vertices');
+        if (vertElem) vertElem.textContent = stats.vertexCount.toLocaleString();
+        const parseElem = document.getElementById('stat-parse-time');
+        if (parseElem) parseElem.textContent = `${parseTimeMs} ms`;
 
         // Dimensions
         const size = stats.boundingBox.size;
-        document.getElementById('stat-size-x').textContent = `${size.x.toFixed(2)} mm`;
-        document.getElementById('stat-size-y').textContent = `${size.y.toFixed(2)} mm`;
-        document.getElementById('stat-size-z').textContent = `${size.z.toFixed(2)} mm`;
+        const sx = document.getElementById('stat-size-x');
+        if (sx) sx.textContent = `${size.x.toFixed(2)} mm`;
+        const sy = document.getElementById('stat-size-y');
+        if (sy) sy.textContent = `${size.y.toFixed(2)} mm`;
+        const sz = document.getElementById('stat-size-z');
+        if (sz) sz.textContent = `${size.z.toFixed(2)} mm`;
 
         // Volume & Surface Area
         const volumeCm3 = stats.volume / 1000.0;
         const areaCm2 = stats.surfaceArea / 100.0;
 
-        document.getElementById('stat-volume').textContent = `${volumeCm3.toFixed(2)} cm³`;
-        document.getElementById('stat-surface-area').textContent = `${areaCm2.toFixed(2)} cm²`;
+        const volElem = document.getElementById('stat-volume');
+        if (volElem) volElem.textContent = `${volumeCm3.toFixed(2)} cm³`;
+        const surfElem = document.getElementById('stat-surface-area');
+        if (surfElem) surfElem.textContent = `${areaCm2.toFixed(2)} cm²`;
 
         // Material Weight Calculation
         this.updateMaterialWeight(volumeCm3);
@@ -713,52 +779,60 @@ class STLViewerApp {
     initEventListeners() {
         // Drag & Drop
         const dropZone = document.getElementById('drop-zone');
-        window.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-active');
-        });
-        window.addEventListener('dragleave', (e) => {
-            if (e.relatedTarget === null) {
+        if (dropZone) {
+            window.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-active');
+            });
+            window.addEventListener('dragleave', (e) => {
+                if (e.relatedTarget === null) {
+                    dropZone.classList.remove('drag-active');
+                }
+            });
+            window.addEventListener('drop', (e) => {
+                e.preventDefault();
                 dropZone.classList.remove('drag-active');
-            }
-        });
-        window.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-active');
-            if (e.dataTransfer.files.length > 0) {
-                this.handleFileSelect(e.dataTransfer.files[0]);
-            }
-        });
+                if (e.dataTransfer.files.length > 0) {
+                    this.handleFileSelect(e.dataTransfer.files[0]);
+                }
+            });
+        }
 
         // File Input Select
         const fileInput = document.getElementById('file-input');
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleFileSelect(e.target.files[0]);
-            }
-        });
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    this.handleFileSelect(e.target.files[0]);
+                }
+            });
+        }
 
         // Measurement click listener
-        this.renderer.domElement.addEventListener('click', (e) => this.handleMeasurementClick(e));
+        if (this.renderer && this.renderer.domElement) {
+            this.renderer.domElement.addEventListener('click', (e) => this.handleMeasurementClick(e));
+        }
 
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.key === ' ') { // Space toggles auto rotation
                 this.isAutoRotating = !this.isAutoRotating;
-                document.getElementById('toggle-autorotate').checked = this.isAutoRotating;
+                const toggle = document.getElementById('toggle-autorotate');
+                if (toggle) toggle.checked = this.isAutoRotating;
             } else if (e.key.toLowerCase() === 'r') {
                 this.resetCameraView();
             } else if (e.key.toLowerCase() === 'w') {
                 const nextMode = this.currentRenderMode === 'wireframe' ? 'shaded' : 'wireframe';
                 this.setRenderMode(nextMode);
-                document.getElementById('render-mode-select').value = nextMode;
+                const select = document.getElementById('render-mode-select');
+                if (select) select.value = nextMode;
             }
         });
     }
 
     handleFileSelect(file) {
         if (!file.name.toLowerCase().endsWith('.stl')) {
-            alert('请上传 .stl 格式的 3D 模型文件');
+            alert('请上传 .stl 格式的 3D 模型文件 / Please upload an .stl file');
             return;
         }
 

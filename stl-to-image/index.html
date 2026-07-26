@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q07HSENH0Y"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Q07HSENH0Y');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Title Tag optimized for high search volume keywords -->
+    <title>Convert STL to Image Online | Free STL to PNG / JPG Converter (High-Res 4K)</title>
+
+    <!-- Meta Search & Keywords -->
+    <meta name="description" content="Free online STL to Image converter. Convert 3D STL files to high-resolution PNG, Transparent PNG, JPG, or WebP images directly in your browser. Render 4K CAD technical drawing images, custom angles, studio lighting, and zero file upload privacy.">
+    <meta name="keywords" content="stl to image, convert stl to image, stl to png, stl to png converter, online stl renderer, 3d stl to 2d image, transparent png 3d model, 4k stl image generator, cad to png">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="STL 3D Online Tools">
+    <link rel="canonical" href="https://open-stl-file.github.io/stl-to-image/">
+
+    <!-- Alternate language links -->
+    <link rel="alternate" hreflang="en" href="https://open-stl-file.github.io/stl-to-image/">
+    <link rel="alternate" hreflang="zh" href="https://open-stl-file.github.io/zh/stl-to-image/">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:url" content="https://open-stl-file.github.io/stl-to-image/">
+    <meta property="og:title" content="Convert STL to Image Online - Free STL to PNG Converter">
+    <meta property="og:description" content="Turn 3D STL files into high-quality PNG or transparent images online. Supports 4K resolution, CAD technical drawing mode, and custom camera angles.">
+    <meta property="og:site_name" content="STL 3D Online Tools">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Convert STL to Image Online | STL to PNG Converter">
+    <meta name="twitter:description" content="Render 3D STL models as high-res 4K PNG, JPG, or Transparent images online without software installation.">
+
+    <!-- JSON-LD Structured Data Schema for Search Engine Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "STL to Image Converter Online",
+      "alternateName": "STL to PNG Converter",
+      "url": "https://open-stl-file.github.io/stl-to-image/",
+      "applicationCategory": "GraphicsApplication",
+      "operatingSystem": "All (Web Browser)",
+      "browserRequirements": "Requires HTML5 WebGL support",
+      "description": "Convert 3D STL files into high-resolution PNG, transparent PNG, JPG, or WebP images online. Features custom camera angles, 4K render output, CAD technical edge styles, and 100% local browser processing.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Instant STL to PNG image conversion",
+        "Transparent background PNG export for graphic design",
+        "High-Resolution 4K Ultra HD (3840x2160) image rendering",
+        "CAD Technical Drawing outline image style",
+        "1080p and Square Thumbnail presets",
+        "100% local client-side WebGL processing for total privacy"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Structured Data Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How to convert an STL file to a PNG image online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "1. Drag & drop your .stl file into the converter window.\n2. Choose your preferred angle, color, and background (Transparent or Solid).\n3. Select your desired image resolution (4K or 1080p) and click 'Convert & Download PNG Image'."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I convert STL to a Transparent PNG image?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Select 'PNG (Transparent Background)' in the Image Format dropdown. The converter will remove the background color, producing a clean transparent PNG image ideal for presentation slides, web pages, and graphic design."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../style.css?v=100">
+
+    <!-- Three.js & OrbitControls Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Header Bar -->
+        <header role="banner">
+            <div class="logo-area">
+                <div class="logo-icon" style="background: linear-gradient(135deg, #10b981, #06b6d4);"><i class="fa-solid fa-file-image" aria-hidden="true"></i></div>
+                <div>
+                    <h1 class="logo-title">STL to Image Converter</h1>
+                    <span class="logo-subtext">Convert 3D STL to PNG, JPG & 4K Transparent Images</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <a href="../" class="btn btn-outline" style="text-decoration: none;" title="Go to 3D Viewer & Geometry Analyzer">
+                    <i class="fa-solid fa-cube"></i> 3D Viewer
+                </a>
+                <a href="../zh/stl-to-image/" class="btn btn-outline" style="text-decoration: none;" title="切换到中文版">
+                    <i class="fa-solid fa-globe"></i> 中文
+                </a>
+                <label for="file-input" class="btn btn-primary" aria-label="Select STL 3D file for image conversion">
+                    <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i> Select STL File
+                </label>
+                <input type="file" id="file-input" accept=".stl" style="display: none;">
+            </div>
+        </header>
+
+        <!-- Main 3D Workspace -->
+        <main id="workspace" role="main">
+            <!-- WebGL Canvas Container -->
+            <div id="canvas-container" aria-label="3D Model Rendering Viewport for Image Generation"></div>
+
+            <!-- Top Camera Angle Controls -->
+            <nav id="view-toolbar" class="floating-panel" aria-label="Camera Angle Presets">
+                <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="Isometric 3D View"><i class="fa-solid fa-arrows-up-to-line"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-front" title="Front Camera View"><i class="fa-solid fa-square"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-top" title="Top Camera View"><i class="fa-solid fa-border-all"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-right" title="Right Camera View"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="Reset Camera"><i class="fa-solid fa-rotate-left"></i></button>
+            </nav>
+
+            <!-- Left Panel: Rendering Style & Colors -->
+            <aside id="left-panel" class="floating-panel" aria-label="Rendering & Material Settings">
+                <section>
+                    <div class="panel-section-title">
+                        <span><i class="fa-solid fa-wand-magic-sparkles"></i> 1. Render Style & Preset</span>
+                    </div>
+                    <div class="sample-grid" style="grid-template-columns: 1fr;">
+                        <button class="sample-item" id="sample-temple" style="border-color: var(--accent-amber); background: rgba(245, 158, 11, 0.1);">
+                            <i class="fa-solid fa-landmark-domed" style="color: var(--accent-amber);"></i>
+                            <span style="color: #fef08a; font-weight: 700;">Temple of Heaven Preset</span>
+                        </button>
+                        <button class="sample-item" id="sample-mobius">
+                            <i class="fa-solid fa-infinity" style="color: var(--accent-cyan);"></i>
+                            <span style="font-weight: 600;">Möbius Sculpture Preset</span>
+                        </button>
+                        <button class="sample-item" id="sample-gear">
+                            <i class="fa-solid fa-gear" style="color: #94a3b8;"></i>
+                            <span style="font-weight: 600;">Spur Gear Preset</span>
+                        </button>
+                    </div>
+                </section>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <div class="control-group">
+                    <label for="render-mode-select" class="control-label" style="color: var(--accent-cyan); font-weight: 600;"><i class="fa-solid fa-camera-retro"></i> Image Rendering Style</label>
+                    <select id="render-mode-select" class="control-input" style="border-color: var(--accent-cyan);">
+                        <option value="shaded">Solid Shaded PBR Color</option>
+                        <option value="cad">CAD Technical Drawing (Black Lines)</option>
+                        <option value="xray">X-Ray Translucent Glass</option>
+                        <option value="solid-wireframe">Solid & Wireframe Mesh</option>
+                        <option value="wireframe">Wireframe Outline</option>
+                        <option value="normal">Normal Map Color</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <label for="model-color-picker"><i class="fa-solid fa-palette"></i> Model Material Color</label>
+                        <input type="color" id="model-color-picker" value="#3b82f6">
+                    </div>
+                    <div class="color-picker-row" style="margin-top: 6px;">
+                        <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="Classic Blue"></div>
+                        <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="Cyan Tech"></div>
+                        <div class="color-dot" style="background: #10b981;" data-color="#10b981" title="Emerald Green"></div>
+                        <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" title="Amber Gold"></div>
+                        <div class="color-dot" style="background: #ef4444;" data-color="#ef4444" title="Rose Red"></div>
+                        <div class="color-dot" style="background: #8b5cf6;" data-color="#8b5cf6" title="Purple"></div>
+                        <div class="color-dot" style="background: #cbd5e1;" data-color="#cbd5e1" title="CAD Silver Grey"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="lighting-preset-select" class="control-label"><i class="fa-solid fa-sun"></i> Studio Lighting</label>
+                    <select id="lighting-preset-select" class="control-input">
+                        <option value="bright">High Brightness Studio</option>
+                        <option value="studio">Standard Studio</option>
+                        <option value="cyberpunk">Cyberpunk Neon</option>
+                        <option value="dramatic">Dramatic Shadows</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="bg-style-select" class="control-label"><i class="fa-solid fa-image"></i> Viewport Background</label>
+                    <select id="bg-style-select" class="control-input">
+                        <option value="dark">Dark Slate (#0f172a)</option>
+                        <option value="light">Pure White (#f8fafc)</option>
+                        <option value="black">Pure Black (#000000)</option>
+                        <option value="blueprint">Engineering Blueprint (#032b56)</option>
+                    </select>
+                </div>
+            </aside>
+
+            <!-- Right Panel: Conversion & Export Settings -->
+            <aside id="right-panel" class="floating-panel" aria-label="Image Export Options">
+                <div>
+                    <div class="panel-section-title">
+                        <span style="color: #10b981;"><i class="fa-solid fa-file-export"></i> 2. Image Conversion Settings</span>
+                    </div>
+                    <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan); word-break: break-all; margin-bottom: 12px;" id="file-info-name">
+                        temple_of_heaven_beijing.stl
+                    </div>
+                </div>
+
+                <!-- Export Format Selector -->
+                <div class="control-group">
+                    <label for="export-format-select" class="control-label"><i class="fa-solid fa-file-image"></i> Output Format</label>
+                    <select id="export-format-select" class="control-input">
+                        <option value="png-transparent">PNG Image (Transparent Background)</option>
+                        <option value="png-solid">PNG Image (Solid Background)</option>
+                        <option value="jpeg">JPEG Image (.jpg)</option>
+                        <option value="webp">WebP Image (.webp)</option>
+                    </select>
+                </div>
+
+                <!-- Resolution Preset Selector -->
+                <div class="control-group">
+                    <label for="export-resolution-select" class="control-label"><i class="fa-solid fa-expand"></i> Image Resolution</label>
+                    <select id="export-resolution-select" class="control-input">
+                        <option value="3840x2160">4K Ultra HD (3840 × 2160 px)</option>
+                        <option value="1920x1080" selected>Full HD 1080p (1920 × 1080 px)</option>
+                        <option value="1080x1080">Square Thumbnail (1080 × 1080 px)</option>
+                        <option value="current">Current Screen Size</option>
+                    </select>
+                </div>
+
+                <!-- Toggles for Image Output -->
+                <div class="toggle-row">
+                    <span>Clean Background (Hide Grid & Axes)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-clean-export" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>Show Grid Lines</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-grid" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>Show XYZ Axes</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-axes" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>360° Auto Rotation</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-autorotate">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Convert Button -->
+                <button class="btn btn-primary" id="btn-convert-download" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                    <i class="fa-solid fa-download"></i> Convert & Download Image
+                </button>
+
+                <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px;">
+                    100% Client-Side Processing • No Server Upload
+                </div>
+            </aside>
+
+            <!-- Drop Zone Overlay -->
+            <div id="drop-zone">
+                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">Drop 3D STL File to Convert to Image</h2>
+                <p style="color: var(--text-muted);">Supports Binary & ASCII STL Files</p>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner">
+                <div class="spinner"></div>
+                <div style="font-size: 15px; font-weight: 600; color: var(--text-main);">Rendering STL Model...</div>
+            </div>
+        </main>
+
+        <!-- SEO Content Article & Guide -->
+        <footer style="padding: 40px 20px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--panel-border); margin-top: 20px;">
+            <div style="max-width: 1000px; margin: 0 auto; color: var(--text-muted); line-height: 1.7; font-size: 14px;">
+                <h2 style="color: var(--text-main); font-size: 22px; font-weight: 700; margin-bottom: 12px;">Convert STL to PNG & JPG Images Online Free</h2>
+                <p>
+                    Our free browser-based <strong>STL to Image Converter</strong> lets you render 3D STL models into crisp, high-resolution <strong>PNG, Transparent PNG, JPG, and WebP images</strong> instantly without installing CAD software or uploading confidential files to external servers.
+                </p>
+
+                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">Key Features</h3>
+                <ul style="padding-left: 20px; margin-bottom: 16px;">
+                    <li><strong>Transparent PNG Background:</strong> Export transparent PNG graphics for web design, e-commerce listings, and presentation slides.</li>
+                    <li><strong>High-Resolution 4K Rendering:</strong> Render crisp 3840×2160 Ultra HD 2D images directly from 3D STL geometry.</li>
+                    <li><strong>CAD Technical Edge Outlines:</strong> Generate clean vector-like engineering drawing images with bold black outlines on white backgrounds.</li>
+                    <li><strong>Custom Angles & Lighting:</strong> Adjust isometric, front, top views, studio lights, and material colors before exporting.</li>
+                </ul>
+
+                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">Frequently Asked Questions</h3>
+                <div style="display: grid; gap: 12px; margin-top: 10px;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                        <strong style="color: var(--text-main);">Q: How do I convert STL to transparent PNG?</strong>
+                        <p style="margin-top: 4px; margin-bottom: 0;">Select "PNG Image (Transparent Background)" in the Output Format dropdown on the right panel, then click "Convert & Download Image".</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                        <strong style="color: var(--text-main);">Q: Are my STL files uploaded to a server?</strong>
+                        <p style="margin-top: 4px; margin-bottom: 0;">No. All WebGL 3D rendering and image conversions take place completely inside your local browser memory. Your 3D models remain 100% private.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Application Script Bindings -->
+    <script src="../js/stlParser.js?v=100"></script>
+    <script src="../js/samples.js?v=100"></script>
+    <script src="../js/app.js?v=100"></script>
+
+    <!-- UI Event Bindings -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sample Handlers
+            document.getElementById('sample-temple').addEventListener('click', () => appInstance.loadSample('temple'));
+            document.getElementById('sample-mobius').addEventListener('click', () => appInstance.loadSample('mobius'));
+            document.getElementById('sample-gear').addEventListener('click', () => appInstance.loadSample('gear'));
+
+            // Render Mode & Material Color
+            document.getElementById('render-mode-select').addEventListener('change', (e) => appInstance.setRenderMode(e.target.value));
+
+            const colorPicker = document.getElementById('model-color-picker');
+            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const color = dot.getAttribute('data-color');
+                    colorPicker.value = color;
+                    appInstance.setModelColor(color);
+                });
+            });
+
+            // Lighting & Background Selectors
+            document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
+            document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
+
+            // Viewport Toggles
+            document.getElementById('toggle-grid').addEventListener('change', (e) => {
+                if (appInstance.gridHelper) appInstance.gridHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-axes').addEventListener('change', (e) => {
+                if (appInstance.axesHelper) appInstance.axesHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-autorotate').addEventListener('change', (e) => {
+                appInstance.isAutoRotating = e.target.checked;
+            });
+
+            // Camera View Presets
+            document.getElementById('btn-cam-iso').addEventListener('click', () => appInstance.setCameraView('iso'));
+            document.getElementById('btn-cam-front').addEventListener('click', () => appInstance.setCameraView('front'));
+            document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
+            document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
+            document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Convert & Download Image Action
+            document.getElementById('btn-convert-download').addEventListener('click', () => {
+                const formatVal = document.getElementById('export-format-select').value;
+                const resVal = document.getElementById('export-resolution-select').value;
+                const cleanExport = document.getElementById('toggle-clean-export').checked;
+
+                let format = 'image/png';
+                let bgTransparent = false;
+
+                if (formatVal === 'png-transparent') {
+                    format = 'image/png';
+                    bgTransparent = true;
+                } else if (formatVal === 'png-solid') {
+                    format = 'image/png';
+                } else if (formatVal === 'jpeg') {
+                    format = 'image/jpeg';
+                } else if (formatVal === 'webp') {
+                    format = 'image/webp';
+                }
+
+                let w = appInstance.container.clientWidth;
+                let h = appInstance.container.clientHeight;
+
+                if (resVal === '3840x2160') {
+                    w = 3840; h = 2160;
+                } else if (resVal === '1920x1080') {
+                    w = 1920; h = 1080;
+                } else if (resVal === '1080x1080') {
+                    w = 1080; h = 1080;
+                }
+
+                appInstance.exportScreenshot({
+                    width: w,
+                    height: h,
+                    format: format,
+                    bgTransparent: bgTransparent,
+                    hideHelpers: cleanExport
+                });
+            });
+        });
+    </script>
+</body>
+</html>

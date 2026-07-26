@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q07HSENH0Y"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Q07HSENH0Y');
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Title Tag -->
+    <title>STL 转图片在线转换器 | 免费 3D STL 转 PNG / JPG (4K 高清透明背景)</title>
+
+    <!-- Meta Search & Keywords -->
+    <meta name="description" content="免费 STL 转图片在线转换工具。无需安装 CAD 软件，直接在浏览器中将 3D STL 模型一键转换为高清 PNG、透明 PNG、JPG 或 WebP 图片。支持 4K 超高清渲染、CAD 工程线框插画风格、自定义视角与 studio 光影。纯本地 WebGL 解析，零隐私泄露。">
+    <meta name="keywords" content="STL转图片, STL转PNG, STL转JPG, 在线STL转图片, 3D模型转2D图片, 透明PNG渲染, CAD图纸导出, 免安装3D渲染, 4K3D截图">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="STL 3D 在线工具">
+    <link rel="canonical" href="https://open-stl-file.github.io/zh/stl-to-image/">
+
+    <!-- Alternate language links -->
+    <link rel="alternate" hreflang="en" href="https://open-stl-file.github.io/stl-to-image/">
+    <link rel="alternate" hreflang="zh" href="https://open-stl-file.github.io/zh/stl-to-image/">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:url" content="https://open-stl-file.github.io/zh/stl-to-image/">
+    <meta property="og:title" content="STL 转图片在线转换器 - 免费 3D 转 PNG / JPG">
+    <meta property="og:description" content="无需下载软件，在线将 3D STL 模型生成高清 PNG 或透明无背景图片，支持 4K 分辨率与 CAD 工程图纸渲染风格。">
+    <meta property="og:site_name" content="STL 3D 在线工具">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="STL 转图片在线转换器 | 3D 转 PNG 工具">
+    <meta name="twitter:description" content="在线将 3D STL 模型生成高清 4K PNG、JPG 或透明背景图片。">
+
+    <!-- JSON-LD Structured Data Schema for Search Engine Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "STL 转图片在线转换器",
+      "alternateName": "STL to PNG Converter",
+      "url": "https://open-stl-file.github.io/zh/stl-to-image/",
+      "applicationCategory": "GraphicsApplication",
+      "operatingSystem": "All (Web Browser)",
+      "browserRequirements": "Requires HTML5 WebGL support",
+      "description": "基于 WebGL 的免费 STL 在线转图片工具。将 3D STL 模型快速转换为高清 PNG、透明无背景 PNG、JPG 或 WebP 图片。支持 4K 渲染、CAD 边框风格与纯本地解析。",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "STL 模型在线一键转 PNG 图片",
+        "透明背景 PNG 导出（适合电商与 PPT 设计）",
+        "4K 超高清（3840×2160）图像渲染",
+        "CAD 工程边框黑线白底图像风格",
+        "1080p 及正方形缩略图预设",
+        "100% 浏览器本地解析，零文件上传隐私泄露"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Structured Data Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "如何在网页中将 STL 模型转换为 PNG 透明图片？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "1. 将 .stl 模型文件拖入网页窗口中；\n2. 在右侧控制面板的'输出图片格式'中选择'PNG 图片 (透明无背景)'；\n3. 选择所需分辨率（如 4K 或 1080p），点击'转换并下载图片'即可获取干净透明的 2D PNG 图片。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "STL 转图片过程中模型会被上传到服务器吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "绝对不会。所有的 3D 渲染与图片生成过程均在您的浏览器本地内存中完成，数据 100% 安全隐私。"
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../style.css?v=100">
+
+    <!-- Three.js & OrbitControls Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Header Bar -->
+        <header role="banner">
+            <div class="logo-area">
+                <div class="logo-icon" style="background: linear-gradient(135deg, #10b981, #06b6d4);"><i class="fa-solid fa-file-image" aria-hidden="true"></i></div>
+                <div>
+                    <h1 class="logo-title">STL 转图片在线转换器</h1>
+                    <span class="logo-subtext">3D STL 一键生成 PNG / JPG / 4K 透明无背景图片</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <a href="../" class="btn btn-outline" style="text-decoration: none;" title="返回 3D 查看与几何分析主页">
+                    <i class="fa-solid fa-cube"></i> 3D 查看器
+                </a>
+                <a href="../../stl-to-image/" class="btn btn-outline" style="text-decoration: none;" title="Switch to English Version">
+                    <i class="fa-solid fa-globe"></i> English
+                </a>
+                <label for="file-input" class="btn btn-primary" aria-label="选择本地 STL 3D 模型">
+                    <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i> 选择 STL 文件
+                </label>
+                <input type="file" id="file-input" accept=".stl" style="display: none;">
+            </div>
+        </header>
+
+        <!-- Main 3D Workspace -->
+        <main id="workspace" role="main">
+            <!-- WebGL Canvas Container -->
+            <div id="canvas-container" aria-label="3D 模型渲染与图片生成视口"></div>
+
+            <!-- Top Camera Angle Controls -->
+            <nav id="view-toolbar" class="floating-panel" aria-label="视角角度控制">
+                <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="轴测 3D 视角"><i class="fa-solid fa-arrows-up-to-line"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-front" title="正视角"><i class="fa-solid fa-square"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-top" title="顶视角"><i class="fa-solid fa-border-all"></i></button>
+                <button class="btn btn-icon btn-sm" id="btn-cam-right" title="右视角"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="复位视角"><i class="fa-solid fa-rotate-left"></i></button>
+            </nav>
+
+            <!-- Left Panel: Rendering Style & Colors -->
+            <aside id="left-panel" class="floating-panel" aria-label="渲染风格与材质设置">
+                <section>
+                    <div class="panel-section-title">
+                        <span><i class="fa-solid fa-wand-magic-sparkles"></i> 1. 渲染风格预设</span>
+                    </div>
+                    <div class="sample-grid" style="grid-template-columns: 1fr;">
+                        <button class="sample-item" id="sample-temple" style="border-color: var(--accent-amber); background: rgba(245, 158, 11, 0.1);">
+                            <i class="fa-solid fa-landmark-domed" style="color: var(--accent-amber);"></i>
+                            <span style="color: #fef08a; font-weight: 700;">北京天坛模型预设</span>
+                        </button>
+                        <button class="sample-item" id="sample-mobius">
+                            <i class="fa-solid fa-infinity" style="color: var(--accent-cyan);"></i>
+                            <span style="font-weight: 600;">莫比乌斯环雕塑预设</span>
+                        </button>
+                        <button class="sample-item" id="sample-gear">
+                            <i class="fa-solid fa-gear" style="color: #94a3b8;"></i>
+                            <span style="font-weight: 600;">精密齿轮模型预设</span>
+                        </button>
+                    </div>
+                </section>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <div class="control-group">
+                    <label for="render-mode-select" class="control-label" style="color: var(--accent-cyan); font-weight: 600;"><i class="fa-solid fa-camera-retro"></i> 导出图片渲染风格</label>
+                    <select id="render-mode-select" class="control-input" style="border-color: var(--accent-cyan);">
+                        <option value="shaded">实体彩色着色 (Solid Shaded PBR)</option>
+                        <option value="cad">CAD 工程黑线插画 (CAD Lines)</option>
+                        <option value="xray">X 光玻璃半透明 (X-Ray)</option>
+                        <option value="solid-wireframe">实体 + 结构线框</option>
+                        <option value="wireframe">网格线框 (Wireframe)</option>
+                        <option value="normal">表面法线颜色 Map</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <label for="model-color-picker"><i class="fa-solid fa-palette"></i> 模型材质颜色</label>
+                        <input type="color" id="model-color-picker" value="#3b82f6">
+                    </div>
+                    <div class="color-picker-row" style="margin-top: 6px;">
+                        <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="经典蓝"></div>
+                        <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="科技青"></div>
+                        <div class="color-dot" style="background: #10b981;" data-color="#10b981" title="翡翠绿"></div>
+                        <div class="color-dot" style="background: #f59e0b;" data-color="#f59e0b" title="琥珀黄"></div>
+                        <div class="color-dot" style="background: #ef4444;" data-color="#ef4444" title="玫瑰红"></div>
+                        <div class="color-dot" style="background: #8b5cf6;" data-color="#8b5cf6" title="紫"></div>
+                        <div class="color-dot" style="background: #cbd5e1;" data-color="#cbd5e1" title="CAD 金属银灰"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="lighting-preset-select" class="control-label"><i class="fa-solid fa-sun"></i> 光照摄影棚</label>
+                    <select id="lighting-preset-select" class="control-input">
+                        <option value="bright">高亮明亮 Studio</option>
+                        <option value="studio">标准工作室 Studio</option>
+                        <option value="cyberpunk">霓虹赛博 Cyberpunk</option>
+                        <option value="dramatic">强对比投影 Dramatic</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="bg-style-select" class="control-label"><i class="fa-solid fa-image"></i> 视口预览背景</label>
+                    <select id="bg-style-select" class="control-input">
+                        <option value="dark">暗蓝深邃 (#0f172a)</option>
+                        <option value="light">明亮极纯白 (#f8fafc)</option>
+                        <option value="black">纯黑模式 (#000000)</option>
+                        <option value="blueprint">工程蓝图 (#032b56)</option>
+                    </select>
+                </div>
+            </aside>
+
+            <!-- Right Panel: Conversion & Export Settings -->
+            <aside id="right-panel" class="floating-panel" aria-label="图片转换与导出设置">
+                <div>
+                    <div class="panel-section-title">
+                        <span style="color: #10b981;"><i class="fa-solid fa-file-export"></i> 2. 图片转换导出设置</span>
+                    </div>
+                    <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan); word-break: break-all; margin-bottom: 12px;" id="file-info-name">
+                        temple_of_heaven_beijing.stl
+                    </div>
+                </div>
+
+                <!-- Export Format Selector -->
+                <div class="control-group">
+                    <label for="export-format-select" class="control-label"><i class="fa-solid fa-file-image"></i> 输出图片格式</label>
+                    <select id="export-format-select" class="control-input">
+                        <option value="png-transparent">PNG 图片 (透明无背景 PNG)</option>
+                        <option value="png-solid">PNG 图片 (纯色背景)</option>
+                        <option value="jpeg">JPEG 图片 (.jpg)</option>
+                        <option value="webp">WebP 图片 (.webp)</option>
+                    </select>
+                </div>
+
+                <!-- Resolution Preset Selector -->
+                <div class="control-group">
+                    <label for="export-resolution-select" class="control-label"><i class="fa-solid fa-expand"></i> 输出图片分辨率</label>
+                    <select id="export-resolution-select" class="control-input">
+                        <option value="3840x2160">4K 超高清 (3840 × 2160 px)</option>
+                        <option value="1920x1080" selected>Full HD 1080p (1920 × 1080 px)</option>
+                        <option value="1080x1080">正方形缩略图 (1080 × 1080 px)</option>
+                        <option value="current">当前屏幕尺寸</option>
+                    </select>
+                </div>
+
+                <!-- Toggles for Image Output -->
+                <div class="toggle-row">
+                    <span>纯净模式 (自动隐藏网格与坐标轴)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-clean-export" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>显示地面网格</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-grid" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>显示 XYZ 坐标轴</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-axes" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span>360° 自动旋转</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-autorotate">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border);">
+
+                <!-- Convert Button -->
+                <button class="btn btn-primary" id="btn-convert-download" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                    <i class="fa-solid fa-download"></i> 转换并下载图片
+                </button>
+
+                <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 10px;">
+                    100% 浏览器本地解析 • 零文件上传风险
+                </div>
+            </aside>
+
+            <!-- Drop Zone Overlay -->
+            <div id="drop-zone">
+                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">释放 STL 3D 模型转换为图片</h2>
+                <p style="color: var(--text-muted);">支持 Binary 及 ASCII 格式 STL 文件</p>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner">
+                <div class="spinner"></div>
+                <div style="font-size: 15px; font-weight: 600; color: var(--text-main);">正在渲染 3D 模型...</div>
+            </div>
+        </main>
+
+        <!-- SEO Content Article & Guide -->
+        <footer style="padding: 40px 20px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--panel-border); margin-top: 20px;">
+            <div style="max-width: 1000px; margin: 0 auto; color: var(--text-muted); line-height: 1.7; font-size: 14px;">
+                <h2 style="color: var(--text-main); font-size: 22px; font-weight: 700; margin-bottom: 12px;">免费 STL 在线转 PNG / JPG 图片转换器指南</h2>
+                <p>
+                    本工具是一款免费免安装的 <strong>STL 在线转图片工具</strong>。无需安装复杂的 3D 建模或 CAD 软件，即可在浏览器中瞬间将 3D STL 模型文件转换为高清 <strong>PNG、透明无背景 PNG、JPG 以及 WebP 格式图片</strong>。
+                </p>
+
+                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">核心特色功能</h3>
+                <ul style="padding-left: 20px; margin-bottom: 16px;">
+                    <li><strong>PNG 透明无背景导出：</strong> 一键抠图导出透明 PNG 图层，极度适合电商展示、产品宣传册及 PPT 汇报。</li>
+                    <li><strong>4K 超高清图像渲染：</strong> 支持最高 3840×2160 像素超高清渲染输出，放大无锯齿。</li>
+                    <li><strong>CAD 工程线框黑线白底：</strong> 可瞬间将 3D 模型转换为清爽的 CAD 工程制图黑线白底风格。</li>
+                    <li><strong>自由调角与摄影棚光影：</strong> 调整轴测、正视、顶视视角，配合 studio 摄影棚级光影后再进行导出。</li>
+                </ul>
+
+                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">常见问题</h3>
+                <div style="display: grid; gap: 12px; margin-top: 10px;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                        <strong style="color: var(--text-main)">问：如何将 STL 转换导出为透明背景的 PNG 图片？</strong>
+                        <p style="margin-top: 4px; margin-bottom: 0;">在右侧面板的“输出图片格式”下拉菜单中选择“PNG 图片 (透明无背景)”，然后点击“转换并下载图片”按钮即可获取去除背景的干净 PNG 图像。</p>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                        <strong style="color: var(--text-main)">问：转化过程中我的 STL 文件会被上传到服务器吗？</strong>
+                        <p style="margin-top: 4px; margin-bottom: 0;">完全不会。所有的 3D 模型解析、渲染与图片生成均在您的浏览器本地内存中运行，绝对保障模型数据隐私。</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Application Script Bindings -->
+    <script src="../../js/stlParser.js?v=100"></script>
+    <script src="../../js/samples.js?v=100"></script>
+    <script src="../../js/app.js?v=100"></script>
+
+    <!-- UI Event Bindings -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sample Handlers
+            document.getElementById('sample-temple').addEventListener('click', () => appInstance.loadSample('temple'));
+            document.getElementById('sample-mobius').addEventListener('click', () => appInstance.loadSample('mobius'));
+            document.getElementById('sample-gear').addEventListener('click', () => appInstance.loadSample('gear'));
+
+            // Render Mode & Material Color
+            document.getElementById('render-mode-select').addEventListener('change', (e) => appInstance.setRenderMode(e.target.value));
+
+            const colorPicker = document.getElementById('model-color-picker');
+            colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const color = dot.getAttribute('data-color');
+                    colorPicker.value = color;
+                    appInstance.setModelColor(color);
+                });
+            });
+
+            // Lighting & Background Selectors
+            document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
+            document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
+
+            // Viewport Toggles
+            document.getElementById('toggle-grid').addEventListener('change', (e) => {
+                if (appInstance.gridHelper) appInstance.gridHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-axes').addEventListener('change', (e) => {
+                if (appInstance.axesHelper) appInstance.axesHelper.visible = e.target.checked;
+            });
+            document.getElementById('toggle-autorotate').addEventListener('change', (e) => {
+                appInstance.isAutoRotating = e.target.checked;
+            });
+
+            // Camera View Presets
+            document.getElementById('btn-cam-iso').addEventListener('click', () => appInstance.setCameraView('iso'));
+            document.getElementById('btn-cam-front').addEventListener('click', () => appInstance.setCameraView('front'));
+            document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
+            document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
+            document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Convert & Download Image Action
+            document.getElementById('btn-convert-download').addEventListener('click', () => {
+                const formatVal = document.getElementById('export-format-select').value;
+                const resVal = document.getElementById('export-resolution-select').value;
+                const cleanExport = document.getElementById('toggle-clean-export').checked;
+
+                let format = 'image/png';
+                let bgTransparent = false;
+
+                if (formatVal === 'png-transparent') {
+                    format = 'image/png';
+                    bgTransparent = true;
+                } else if (formatVal === 'png-solid') {
+                    format = 'image/png';
+                } else if (formatVal === 'jpeg') {
+                    format = 'image/jpeg';
+                } else if (formatVal === 'webp') {
+                    format = 'image/webp';
+                }
+
+                let w = appInstance.container.clientWidth;
+                let h = appInstance.container.clientHeight;
+
+                if (resVal === '3840x2160') {
+                    w = 3840; h = 2160;
+                } else if (resVal === '1920x1080') {
+                    w = 1920; h = 1080;
+                } else if (resVal === '1080x1080') {
+                    w = 1080; h = 1080;
+                }
+
+                appInstance.exportScreenshot({
+                    width: w,
+                    height: h,
+                    format: format,
+                    bgTransparent: bgTransparent,
+                    hideHelpers: cleanExport
+                });
+            });
+        });
+    </script>
+</body>
+</html>
