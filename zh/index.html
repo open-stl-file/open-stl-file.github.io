@@ -17,8 +17,8 @@
     <title>STL 在线打开与 3D 几何分析工具 | 免费 3D 打印模型在线查看器</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮、CAD 边框制图模式、三维尺寸检测、局部选区涂色着色、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
-    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 3D模型局部涂色, 3D选区着色, 莫比乌斯环3D模型, 北京天坛3D模型, 工业齿轮STL, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D">
+    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮、CAD 边框制图模式、三维尺寸检测、局部选区涂色着色与撤回重做、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
+    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 3D模型局部涂色, 3D涂色撤回, 莫比乌斯环3D模型, 北京天坛3D模型, 工业齿轮STL, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Viewer">
     <link rel="canonical" href="https://open-stl-file.github.io/zh/">
@@ -32,7 +32,7 @@
     <meta property="og:locale" content="zh_CN">
     <meta property="og:url" content="https://open-stl-file.github.io/zh/">
     <meta property="og:title" content="STL 在线打开与 3D 几何分析工具 - 纯浏览器本地解析">
-    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮模型、3D 模型局部选区涂色、CAD 工程边框插画渲染模式。">
+    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮模型、3D 模型局部选区涂色与撤回重做、CAD 工程边框插画渲染模式。">
     <meta property="og:site_name" content="STL 3D 在线查看器">
 
     <!-- Twitter Card Meta Tags -->
@@ -51,7 +51,7 @@
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "基于 WebGL 的免费 STL 在线打开与 3D 几何分析工具。支持二进制和 ASCII 格式 STL 文件的拖拽解析、3D 局部选区涂色、体积表面积计算、3D 打印重量估算及空间测量。",
+      "description": "基于 WebGL 的免费 STL 在线打开与 3D 几何分析工具。支持二进制和 ASCII 格式 STL 文件的拖拽解析、3D 局部选区涂色与撤回 (Ctrl+Z)、体积表面积计算、3D 打印重量估算及空间测量。",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -61,7 +61,7 @@
         "莫比乌斯环雕塑 3D 模型",
         "北京天坛祈年殿 3D 模型",
         "工业精密齿轮 3D 模型",
-        "3D 表面局部区域/面片选区涂色着色",
+        "3D 表面局部区域/面片选区涂色着色与撤回/重做 (Ctrl+Z / Ctrl+Y)",
         "CAD 工程边框/插画高清晰渲染模式",
         "Binary 及 ASCII 格式 STL 拖拽即开",
         "精准几何体积与表面积计算",
@@ -79,10 +79,10 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "如何在网页中对 STL 3D 模型进行局部区域/选区上色？",
+          "name": "如何在网页中对 STL 3D 模型进行局部上色并支持撤回？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "在左侧控制面板的'模型材质颜色'中，将上色模式切换为'局部选区着色'，选择画刷半径（如单面片、5mm、10mm 等），然后直接用鼠标在 3D 模型表面点击即可对选中的局部区域进行精细上色。"
+            "text": "在左侧控制面板中切换为'局部选区着色'，直接点击 3D 模型上色。如果涂错，可以点击'撤回'按钮或按下快捷键 Ctrl+Z 瞬间撤回涂色步骤。"
           }
         }
       ]
@@ -192,7 +192,7 @@
                     </select>
                 </div>
 
-                <!-- Color Selector with Selective Regional Area Painting Mode -->
+                <!-- Color Selector with Selective Regional Area Painting Mode & Undo/Redo -->
                 <div class="control-group">
                     <div class="control-label">
                         <label for="model-color-picker"><i class="fa-solid fa-palette"></i> 模型材质颜色</label>
@@ -209,12 +209,12 @@
                         </button>
                     </div>
 
-                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <!-- Paint Brush Controls & Undo/Redo Buttons (shown when in Regional Paint Mode) -->
                     <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
-                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
-                            <i class="fa-solid fa-hand-pointer"></i> 提示: 点击 3D 模型表面进行局部着色
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">
+                            <i class="fa-solid fa-hand-pointer"></i> 提示: 点击 3D 模型表面局部着色
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                             <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">画刷范围:</label>
                             <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
                                 <option value="0">单面片 (Single Facet)</option>
@@ -223,6 +223,15 @@
                                 <option value="20">20 mm 大范围</option>
                                 <option value="50">50 mm 超大范围</option>
                             </select>
+                        </div>
+                        <!-- Undo & Redo Actions -->
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-paint-undo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="撤回上一步涂色 (Ctrl+Z)" disabled>
+                                <i class="fa-solid fa-rotate-left"></i> 撤回
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-paint-redo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="重做涂色 (Ctrl+Y)" disabled>
+                                <i class="fa-solid fa-rotate-right"></i> 重做
+                            </button>
                         </div>
                     </div>
 
@@ -475,8 +484,8 @@
                         </details>
 
                         <details class="faq-item">
-                            <summary><h4>如何对 STL 3D 模型进行局部选区上色？</h4></summary>
-                            <p>在左侧“模型材质颜色”下方点击“局部选区着色”，选择画刷范围（如单面片或 10mm 范围），然后直接点击 3D 模型表面即可对选中局部精细涂色。</p>
+                            <summary><h4>如何对 STL 3D 模型进行局部选区上色与撤回？</h4></summary>
+                            <p>在左侧“模型材质颜色”下方点击“局部选区着色”，选择画刷范围（如单面片或 10mm 范围），然后直接点击 3D 模型表面即可对选中局部精细涂色。支持点击撤回按钮或按 Ctrl+Z 进行撤回。</p>
                         </details>
                     </section>
                 </article>
@@ -533,6 +542,8 @@
             const btnColorPaint = document.getElementById('btn-color-mode-paint');
             const paintBrushControls = document.getElementById('paint-brush-controls');
             const brushSizeSelect = document.getElementById('brush-size-select');
+            const undoPaintBtn = document.getElementById('btn-paint-undo');
+            const redoPaintBtn = document.getElementById('btn-paint-redo');
 
             if (btnColorAll && btnColorPaint) {
                 btnColorAll.addEventListener('click', () => {
@@ -561,6 +572,9 @@
                     appInstance.setBrushRadius(e.target.value);
                 });
             }
+
+            if (undoPaintBtn) undoPaintBtn.addEventListener('click', () => appInstance.undoPaint());
+            if (redoPaintBtn) redoPaintBtn.addEventListener('click', () => appInstance.redoPaint());
 
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));

@@ -17,8 +17,8 @@
     <title>STL 转图片与 360° 动态图在线转换器 | 免费 3D STL 转 PNG / WebM / MP4 / GIF</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="免费 STL 转图片与 360 度动态图在线转换工具。无需安装 CAD 软件，直接在浏览器中将 3D STL 模型一键转换为高清 PNG、透明 PNG、360° 旋转 WebM/MP4 视频、GIF 动态图、JPG 或 WebP 图片。支持 3D 局部选区涂色、4K 渲染与纯本地解析。">
-    <meta name="keywords" content="STL转图片, STL转PNG, STL转视频, STL 360度旋转动画, STL转WebM, STL转MP4, STL转GIF, 3D模型局部着色, 透明PNG渲染, CAD图纸导出, 4K3D截图">
+    <meta name="description" content="免费 STL 转图片与 360 度动态图在线转换工具。无需安装 CAD 软件，直接在浏览器中将 3D STL 模型一键转换为高清 PNG、透明 PNG、360° 旋转 WebM/MP4 视频、GIF 动态图、JPG 或 WebP 图片。支持 3D 局部选区涂色与撤回重做 (Ctrl+Z)、4K 渲染与纯本地解析。">
+    <meta name="keywords" content="STL转图片, STL转PNG, STL转视频, STL 360度旋转动画, STL转WebM, STL转MP4, STL转GIF, 3D模型局部着色撤回, 透明PNG渲染, CAD图纸导出, 4K3D截图">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D 在线工具">
     <link rel="canonical" href="https://open-stl-file.github.io/zh/stl-to-image/">
@@ -51,7 +51,7 @@
       "applicationCategory": "GraphicsApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "基于 WebGL 的免费 STL 在线转图片与动态图工具。将 3D STL 模型快速转换为高清 PNG、透明无背景 PNG、360 度旋转 WebM/MP4 视频、JPG 或 WebP 图片。支持 3D 局部选区涂色、4K 渲染、CAD 边框风格与纯本地解析。",
+      "description": "基于 WebGL 的免费 STL 在线转图片与动态图工具。将 3D STL 模型快速转换为高清 PNG、透明无背景 PNG、360 度旋转 WebM/MP4 视频、JPG 或 WebP 图片。支持 3D 局部选区涂色与撤回 (Ctrl+Z)、4K 渲染、CAD 边框风格与纯本地解析。",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -59,7 +59,7 @@
       },
       "featureList": [
         "STL 模型在线一键转 PNG 图片与 360 度旋转视频",
-        "3D 表面局部区域选区涂色",
+        "3D 表面局部区域选区涂色与撤回重做 (Ctrl+Z / Ctrl+Y)",
         "透明背景 PNG 导出（适合电商与 PPT 设计）",
         "360 度旋转 WebM / MP4 60FPS 动画视频生成",
         "4K 超高清（3840×2160）图像渲染",
@@ -207,12 +207,12 @@
                         </button>
                     </div>
 
-                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <!-- Paint Brush Controls & Undo/Redo Buttons (shown when in Regional Paint Mode) -->
                     <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
-                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">
                             <i class="fa-solid fa-hand-pointer"></i> 提示: 点击 3D 模型表面局部着色
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                             <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">画刷范围:</label>
                             <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
                                 <option value="0">单面片 (Single Facet)</option>
@@ -221,6 +221,15 @@
                                 <option value="20">20 mm 大范围</option>
                                 <option value="50">50 mm 超大范围</option>
                             </select>
+                        </div>
+                        <!-- Undo & Redo Actions -->
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-paint-undo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="撤回上一步涂色 (Ctrl+Z)" disabled>
+                                <i class="fa-solid fa-rotate-left"></i> 撤回
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-paint-redo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="重做涂色 (Ctrl+Y)" disabled>
+                                <i class="fa-solid fa-rotate-right"></i> 重做
+                            </button>
                         </div>
                     </div>
 
@@ -449,6 +458,8 @@
             const btnColorPaint = document.getElementById('btn-color-mode-paint');
             const paintBrushControls = document.getElementById('paint-brush-controls');
             const brushSizeSelect = document.getElementById('brush-size-select');
+            const undoPaintBtn = document.getElementById('btn-paint-undo');
+            const redoPaintBtn = document.getElementById('btn-paint-redo');
 
             if (btnColorAll && btnColorPaint) {
                 btnColorAll.addEventListener('click', () => {
@@ -477,6 +488,9 @@
                     appInstance.setBrushRadius(e.target.value);
                 });
             }
+
+            if (undoPaintBtn) undoPaintBtn.addEventListener('click', () => appInstance.undoPaint());
+            if (redoPaintBtn) redoPaintBtn.addEventListener('click', () => appInstance.redoPaint());
 
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));

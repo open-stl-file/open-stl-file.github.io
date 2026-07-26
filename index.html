@@ -17,8 +17,8 @@
     <title>Online 3D STL Viewer & Analyzer | Free WebGL 3D Model Viewer</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="Free online 3D STL file viewer and geometry analyzer. Open Binary & ASCII STL files directly in your browser with zero upload. Features Möbius Strip, Temple of Heaven, Mechanical Gear, selective area 3D painting, CAD technical edge rendering, volume, surface area, and 3D printing weight calculation. Data parsed 100% locally for complete privacy.">
-    <meta name="keywords" content="STL viewer online, online 3D viewer, open STL file online, 3D model selective painting, 3D area color brush, 3D printing volume calculator, STL 3D measurement tool, WebGL 3D model viewer, free 3D viewer">
+    <meta name="description" content="Free online 3D STL file viewer and geometry analyzer. Open Binary & ASCII STL files directly in your browser with zero upload. Features Möbius Strip, Temple of Heaven, Mechanical Gear, selective area 3D painting with Undo/Redo, CAD technical edge rendering, volume, surface area, and 3D printing weight calculation. Data parsed 100% locally for complete privacy.">
+    <meta name="keywords" content="STL viewer online, online 3D viewer, open STL file online, 3D model selective painting, 3D area color brush undo, 3D printing volume calculator, STL 3D measurement tool, WebGL 3D model viewer, free 3D viewer">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Viewer">
     <link rel="canonical" href="https://open-stl-file.github.io/">
@@ -32,7 +32,7 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:url" content="https://open-stl-file.github.io/">
     <meta property="og:title" content="Online 3D STL Viewer & Analyzer - Free Browser-Based 3D Tool">
-    <meta property="og:description" content="Open and analyze 3D STL models instantly in your web browser. Features selective area 3D painting, 3D print weight calculation, and CAD technical drawing styles with total privacy.">
+    <meta property="og:description" content="Open and analyze 3D STL models instantly in your web browser. Features selective area 3D painting with Undo/Redo, 3D print weight calculation, and CAD technical drawing styles with total privacy.">
     <meta property="og:site_name" content="STL 3D Online Viewer">
 
     <!-- Twitter Card Meta Tags -->
@@ -51,7 +51,7 @@
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "A browser-based WebGL tool for opening Binary and ASCII STL files. Features instant drag-and-drop parsing, selective area 3D surface painting, 3D volume, surface area, and 3D printing material weight estimation.",
+      "description": "A browser-based WebGL tool for opening Binary and ASCII STL files. Features instant drag-and-drop parsing, selective area 3D surface painting with Undo/Redo (Ctrl+Z), 3D volume, surface area, and 3D printing material weight estimation.",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -61,7 +61,7 @@
         "Möbius Strip Sculpture 3D preset",
         "Temple of Heaven (Beijing) 3D preset",
         "Mechanical Spur Gear 3D preset",
-        "Selective area & facet 3D surface color painting",
+        "Selective area & facet 3D surface color painting with Undo / Redo (Ctrl+Z / Ctrl+Y)",
         "CAD Technical Edges rendering mode",
         "Binary & ASCII STL drag-and-drop parsing",
         "3D volume and surface area calculation",
@@ -79,10 +79,10 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How to paint specific regions of a 3D STL model online?",
+          "name": "How to paint specific regions of a 3D STL model online with Undo support?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Switch to 'Selective Area Painting' mode in the Material Color section, select a brush radius (Single Facet, 5mm, 10mm, etc.), and click anywhere on the 3D model surface to color only that specific region."
+            "text": "Switch to 'Selective Area' mode in the Material Color section, select a brush radius, and click anywhere on the 3D model surface. Press Ctrl+Z or click the Undo button anytime to reverse paint actions."
           }
         }
       ]
@@ -192,7 +192,7 @@
                     </select>
                 </div>
 
-                <!-- Color Selector with Selective Regional Area Painting Mode -->
+                <!-- Color Selector with Selective Regional Area Painting Mode & Undo/Redo -->
                 <div class="control-group">
                     <div class="control-label">
                         <label for="model-color-picker"><i class="fa-solid fa-palette"></i> Material Color</label>
@@ -209,12 +209,12 @@
                         </button>
                     </div>
 
-                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <!-- Paint Brush Controls & Undo/Redo Buttons (shown when in Regional Paint Mode) -->
                     <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
-                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">
                             <i class="fa-solid fa-hand-pointer"></i> Tip: Click 3D surface to paint region
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                             <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">Brush Radius:</label>
                             <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
                                 <option value="0">Single Facet</option>
@@ -223,6 +223,15 @@
                                 <option value="20">20 mm Large</option>
                                 <option value="50">50 mm Extra Large</option>
                             </select>
+                        </div>
+                        <!-- Undo & Redo Actions -->
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-paint-undo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="Undo Paint Action (Ctrl+Z)" disabled>
+                                <i class="fa-solid fa-rotate-left"></i> Undo
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-paint-redo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="Redo Paint Action (Ctrl+Y)" disabled>
+                                <i class="fa-solid fa-rotate-right"></i> Redo
+                            </button>
                         </div>
                     </div>
 
@@ -475,8 +484,8 @@
                         </details>
 
                         <details class="faq-item">
-                            <summary><h4>How to paint specific regions of a 3D STL model online?</h4></summary>
-                            <p>Switch to 'Selective Area Painting' mode in the Material Color section, select a brush radius (Single Facet, 5mm, 10mm, etc.), and click anywhere on the 3D model surface to color only that specific region.</p>
+                            <summary><h4>How to paint specific regions of a 3D STL model online with Undo support?</h4></summary>
+                            <p>Switch to 'Selective Area' mode in the Material Color section, select a brush radius, and click anywhere on the 3D model surface. Press Ctrl+Z or click the Undo button anytime to reverse paint actions.</p>
                         </details>
                     </section>
                 </article>
@@ -533,6 +542,8 @@
             const btnColorPaint = document.getElementById('btn-color-mode-paint');
             const paintBrushControls = document.getElementById('paint-brush-controls');
             const brushSizeSelect = document.getElementById('brush-size-select');
+            const undoPaintBtn = document.getElementById('btn-paint-undo');
+            const redoPaintBtn = document.getElementById('btn-paint-redo');
 
             if (btnColorAll && btnColorPaint) {
                 btnColorAll.addEventListener('click', () => {
@@ -561,6 +572,9 @@
                     appInstance.setBrushRadius(e.target.value);
                 });
             }
+
+            if (undoPaintBtn) undoPaintBtn.addEventListener('click', () => appInstance.undoPaint());
+            if (redoPaintBtn) redoPaintBtn.addEventListener('click', () => appInstance.redoPaint());
 
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));

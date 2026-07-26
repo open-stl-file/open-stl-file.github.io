@@ -17,7 +17,7 @@
     <title>Convert STL to Image & 360° Video Online | Free STL to PNG / WebM / MP4 / GIF Converter</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="Free online STL to Image & Animation converter. Convert 3D STL files to high-resolution PNG, Transparent PNG, 360° Animated WebM/MP4 Video, JPG, or WebP images directly in your browser. Features 3D regional surface painting, 4K CAD rendering, studio lighting, zero upload privacy.">
+    <meta name="description" content="Free online STL to Image & Animation converter. Convert 3D STL files to high-resolution PNG, Transparent PNG, 360° Animated WebM/MP4 Video, JPG, or WebP images directly in your browser. Features 3D regional surface painting with Undo/Redo, 4K CAD rendering, studio lighting, zero upload privacy.">
     <meta name="keywords" content="stl to image, convert stl to image, stl to png, stl to video, stl 360 animation, stl to mp4, stl to webm, stl to gif, transparent png 3d model, 4k stl image generator, cad to png">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Tools">
@@ -51,7 +51,7 @@
       "applicationCategory": "GraphicsApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "Convert 3D STL files into high-resolution PNG, transparent PNG, 360-degree WebM/MP4 videos, JPG, or WebP images online. Features custom camera angles, 4K render output, CAD technical edge styles, and 100% local browser processing.",
+      "description": "Convert 3D STL files into high-resolution PNG, transparent PNG, 360-degree WebM/MP4 videos, JPG, or WebP images online. Features custom camera angles, 4K render output, CAD technical edge styles, selective area painting with Undo/Redo, and 100% local browser processing.",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -61,7 +61,7 @@
         "Instant STL to PNG image conversion",
         "Transparent background PNG export for graphic design",
         "360-degree rotating WebM/MP4 3D animation video generator",
-        "Selective regional area 3D surface painting",
+        "Selective regional area 3D surface painting with Undo / Redo (Ctrl+Z / Ctrl+Y)",
         "High-Resolution 4K Ultra HD (3840x2160) image rendering",
         "CAD Technical Drawing outline image style",
         "100% local client-side WebGL processing for total privacy"
@@ -207,12 +207,12 @@
                         </button>
                     </div>
 
-                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <!-- Paint Brush Controls & Undo/Redo Buttons (shown when in Regional Paint Mode) -->
                     <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
-                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">
                             <i class="fa-solid fa-hand-pointer"></i> Tip: Click 3D surface to paint region
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                             <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">Brush Radius:</label>
                             <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
                                 <option value="0">Single Facet</option>
@@ -221,6 +221,15 @@
                                 <option value="20">20 mm Large</option>
                                 <option value="50">50 mm Extra Large</option>
                             </select>
+                        </div>
+                        <!-- Undo & Redo Actions -->
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-paint-undo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="Undo Paint Action (Ctrl+Z)" disabled>
+                                <i class="fa-solid fa-rotate-left"></i> Undo
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-paint-redo" style="flex: 1; padding: 4px 6px; font-size: 11px;" title="Redo Paint Action (Ctrl+Y)" disabled>
+                                <i class="fa-solid fa-rotate-right"></i> Redo
+                            </button>
                         </div>
                     </div>
 
@@ -449,6 +458,8 @@
             const btnColorPaint = document.getElementById('btn-color-mode-paint');
             const paintBrushControls = document.getElementById('paint-brush-controls');
             const brushSizeSelect = document.getElementById('brush-size-select');
+            const undoPaintBtn = document.getElementById('btn-paint-undo');
+            const redoPaintBtn = document.getElementById('btn-paint-redo');
 
             if (btnColorAll && btnColorPaint) {
                 btnColorAll.addEventListener('click', () => {
@@ -477,6 +488,9 @@
                     appInstance.setBrushRadius(e.target.value);
                 });
             }
+
+            if (undoPaintBtn) undoPaintBtn.addEventListener('click', () => appInstance.undoPaint());
+            if (redoPaintBtn) redoPaintBtn.addEventListener('click', () => appInstance.redoPaint());
 
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));

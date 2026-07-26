@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
- * Supports Selective Area / Facet Regional Color Painting (3D 局部/区域选区着色).
+ * Supports Selective Area / Facet Regional Color Painting with Undo / Redo History (Ctrl+Z / Ctrl+Y).
  */
 class STLViewerApp {
     constructor() {
@@ -34,9 +34,12 @@ class STLViewerApp {
         this.currentColor = '#3b82f6';
         this.userOverrodeColor = false; // Flag indicating if user picked a custom material color
 
-        // Regional Paint Mode State
+        // Regional Paint Mode State & Undo History Stack
         this.paintMode = false; // Entire model vs selective regional area painting
         this.brushRadius = 0; // 0 = Single Facet, >0 = Radius in mm
+        this.paintHistory = []; // Snapshots of Float32Array color attribute
+        this.paintHistoryIndex = -1;
+        this.maxHistorySteps = 25;
 
         // Stats & Data
         this.currentStats = null;
@@ -190,6 +193,8 @@ class STLViewerApp {
             this.currentGeometry.dispose();
             this.currentGeometry = null;
         }
+        this.paintHistory = [];
+        this.paintHistoryIndex = -1;
     }
 
     /**
@@ -488,7 +493,12 @@ class STLViewerApp {
                 this.currentMesh.material.color.set(0xffffff);
                 this.currentMesh.material.needsUpdate = true;
             }
+            // Save initial state if history empty
+            if (this.paintHistory.length === 0 && this.currentGeometry && this.currentGeometry.attributes.color) {
+                this.savePaintSnapshot();
+            }
         }
+        this.updatePaintHistoryUI();
     }
 
     /**
@@ -520,6 +530,90 @@ class STLViewerApp {
     }
 
     /**
+     * Saves a snapshot of current vertex colors to the paint history stack
+     */
+    savePaintSnapshot() {
+        if (!this.currentGeometry || !this.currentGeometry.attributes.color) return;
+        const colorArray = this.currentGeometry.attributes.color.array;
+
+        // Truncate redo stack if needed
+        if (this.paintHistoryIndex < this.paintHistory.length - 1) {
+            this.paintHistory = this.paintHistory.slice(0, this.paintHistoryIndex + 1);
+        }
+
+        // Clone current color array
+        this.paintHistory.push(new Float32Array(colorArray));
+
+        // Limit stack size
+        if (this.paintHistory.length > this.maxHistorySteps) {
+            this.paintHistory.shift();
+        }
+
+        this.paintHistoryIndex = this.paintHistory.length - 1;
+        this.updatePaintHistoryUI();
+    }
+
+    /**
+     * Undo regional paint step (Ctrl+Z)
+     */
+    undoPaint() {
+        if (this.paintHistoryIndex > 0) {
+            this.paintHistoryIndex--;
+            this.applyPaintSnapshot(this.paintHistory[this.paintHistoryIndex]);
+            this.updatePaintHistoryUI();
+        }
+    }
+
+    /**
+     * Redo regional paint step (Ctrl+Y)
+     */
+    redoPaint() {
+        if (this.paintHistoryIndex < this.paintHistory.length - 1) {
+            this.paintHistoryIndex++;
+            this.applyPaintSnapshot(this.paintHistory[this.paintHistoryIndex]);
+            this.updatePaintHistoryUI();
+        }
+    }
+
+    /**
+     * Applies snapshot Float32Array to geometry color attribute
+     */
+    applyPaintSnapshot(snapshotArray) {
+        if (!this.currentGeometry || !this.currentGeometry.attributes.color || !snapshotArray) return;
+        const colorAttr = this.currentGeometry.attributes.color;
+        colorAttr.array.set(snapshotArray);
+        colorAttr.needsUpdate = true;
+
+        if (this.currentMesh && this.currentMesh.material) {
+            this.currentMesh.material.vertexColors = true;
+            this.currentMesh.material.color.set(0xffffff);
+            this.currentMesh.material.needsUpdate = true;
+        }
+    }
+
+    /**
+     * Updates Undo / Redo button disabled states in UI
+     */
+    updatePaintHistoryUI() {
+        const undoBtn = document.getElementById('btn-paint-undo');
+        const redoBtn = document.getElementById('btn-paint-redo');
+
+        const canUndo = this.paintHistoryIndex > 0;
+        const canRedo = this.paintHistoryIndex >= 0 && this.paintHistoryIndex < this.paintHistory.length - 1;
+
+        if (undoBtn) {
+            undoBtn.disabled = !canUndo;
+            undoBtn.style.opacity = canUndo ? '1' : '0.4';
+            undoBtn.style.cursor = canUndo ? 'pointer' : 'not-allowed';
+        }
+        if (redoBtn) {
+            redoBtn.disabled = !canRedo;
+            redoBtn.style.opacity = canRedo ? '1' : '0.4';
+            redoBtn.style.cursor = canRedo ? 'pointer' : 'not-allowed';
+        }
+    }
+
+    /**
      * Handles 3D Canvas Click when Regional Paint Mode is Active
      */
     handlePaintClick(event) {
@@ -534,7 +628,16 @@ class STLViewerApp {
 
         if (intersects.length > 0) {
             const hit = intersects[0];
+
+            // Save snapshot before paint action
+            if (this.paintHistory.length === 0) {
+                this.savePaintSnapshot();
+            }
+
             this.paintRegion(hit.point, hit.faceIndex);
+
+            // Save snapshot after paint action
+            this.savePaintSnapshot();
         }
     }
 
@@ -590,11 +693,13 @@ class STLViewerApp {
         const baseColor = new THREE.Color(this.currentColor);
 
         if (geo.attributes.color) {
+            this.savePaintSnapshot();
             const colorAttr = geo.attributes.color;
             for (let i = 0; i < colorAttr.count; i++) {
                 colorAttr.setXYZ(i, baseColor.r, baseColor.g, baseColor.b);
             }
             colorAttr.needsUpdate = true;
+            this.savePaintSnapshot();
         }
 
         if (this.currentMesh && this.currentMesh.material) {
@@ -1165,17 +1270,28 @@ class STLViewerApp {
             });
         }
 
-        // Keyboard Shortcuts
+        // Keyboard Shortcuts (Ctrl+Z Undo, Ctrl+Y Redo, Space Auto-Rotate, etc.)
         window.addEventListener('keydown', (e) => {
-            if (e.key === ' ') { // Space toggles auto rotation
+            const isCtrl = e.ctrlKey || e.metaKey;
+            if (isCtrl && e.key.toLowerCase() === 'z') {
+                if (e.shiftKey) {
+                    this.redoPaint();
+                } else {
+                    this.undoPaint();
+                }
+                e.preventDefault();
+            } else if (isCtrl && e.key.toLowerCase() === 'y') {
+                this.redoPaint();
+                e.preventDefault();
+            } else if (e.key === ' ') { // Space toggles auto rotation
                 this.setAutoRotate(!this.isAutoRotating);
                 const toggle = document.getElementById('toggle-autorotate');
                 if (toggle) toggle.checked = this.isAutoRotating;
                 const rotateDirGroup = document.getElementById('auto-rotate-dir-group');
                 if (rotateDirGroup) rotateDirGroup.style.display = this.isAutoRotating ? 'block' : 'none';
-            } else if (e.key.toLowerCase() === 'r') {
+            } else if (e.key.toLowerCase() === 'r' && !isCtrl) {
                 this.resetCameraView();
-            } else if (e.key.toLowerCase() === 'w') {
+            } else if (e.key.toLowerCase() === 'w' && !isCtrl) {
                 const nextMode = this.currentRenderMode === 'wireframe' ? 'shaded' : 'wireframe';
                 this.setRenderMode(nextMode);
                 const select = document.getElementById('render-mode-select');
