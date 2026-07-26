@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video Exporter (WebM, MP4, 60FPS, Custom Duration & Camera Orbits).
- * Features Model Orientation Calibration (姿态校正 / Z-Up转Y-Up一键摆正).
+ * Automatically overlays top-right domain watermark (open-stl-file.github.io) on exported images & videos.
  */
 class STLViewerApp {
     constructor() {
@@ -1031,7 +1031,57 @@ class STLViewerApp {
     }
 
     /**
-     * High-Resolution Image Export (PNG / JPG / WebP)
+     * Draws domain watermark (open-stl-file.github.io) on 2D Canvas context at Top-Right Corner
+     */
+    drawWatermark(ctx, width, height, text = 'open-stl-file.github.io') {
+        const fontSize = Math.max(14, Math.round(height * 0.026));
+        ctx.font = `600 ${fontSize}px "JetBrains Mono", Inter, "Segoe UI", sans-serif`;
+
+        const textMetrics = ctx.measureText(text);
+        const textWidth = textMetrics.width;
+        const marginX = fontSize * 1.2;
+        const marginY = fontSize * 1.4;
+
+        const x = width - marginX - textWidth;
+        const y = marginY;
+
+        const paddingX = fontSize * 0.55;
+        const paddingY = fontSize * 0.35;
+        const boxX = x - paddingX;
+        const boxY = y - fontSize * 0.85 - paddingY;
+        const boxWidth = textWidth + paddingX * 2;
+        const boxHeight = fontSize + paddingY * 2;
+        const radius = fontSize * 0.35;
+
+        // Semi-transparent dark slate background pill
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, radius);
+        } else {
+            ctx.rect(boxX, boxY, boxWidth, boxHeight);
+        }
+        ctx.fill();
+
+        // Subtle cyan glow border
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Watermark Text
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillStyle = '#38bdf8'; // Sky blue font
+        ctx.fillText(text, x, y);
+
+        ctx.restore();
+    }
+
+    /**
+     * High-Resolution Image Export (PNG / JPG / WebP) with Top-Right Domain Watermark
      */
     exportScreenshot(options = {}) {
         const {
@@ -1068,7 +1118,24 @@ class STLViewerApp {
         }
 
         this.renderer.render(this.scene, this.camera);
-        const dataURL = this.renderer.domElement.toDataURL(format);
+
+        // Create 2D Composite Canvas to draw 3D WebGL frame + top-right domain watermark
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const ctx = tempCanvas.getContext('2d');
+
+        if (!bgTransparent && this.scene.background) {
+            ctx.fillStyle = '#' + this.scene.background.getHexString();
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        ctx.drawImage(this.renderer.domElement, 0, 0);
+
+        // Draw top-right watermark
+        this.drawWatermark(ctx, width, height, 'open-stl-file.github.io');
+
+        const dataURL = tempCanvas.toDataURL(format);
 
         // Restore state
         if (options.hideHelpers) {
@@ -1093,8 +1160,7 @@ class STLViewerApp {
     }
 
     /**
-     * Captures 360° Rotating Motion Video or Animation (WebM, MP4)
-     * Uses Screen-Space Relative Axes based on User's Current Baseline View!
+     * Captures 360° Rotating Motion Video or Animation (WebM, MP4) with Top-Right Domain Watermark
      */
     record360Animation(options = {}) {
         const {
@@ -1123,8 +1189,13 @@ class STLViewerApp {
             if (this.boundingBoxHelper) this.boundingBoxHelper.visible = false;
         }
 
-        const canvas = this.renderer.domElement;
-        const stream = canvas.captureStream(fps);
+        // Create 2D Composite Canvas for video stream capturing
+        const compCanvas = document.createElement('canvas');
+        compCanvas.width = this.renderer.domElement.width;
+        compCanvas.height = this.renderer.domElement.height;
+        const compCtx = compCanvas.getContext('2d');
+
+        const stream = compCanvas.captureStream(fps);
 
         let mimeType = 'video/webm;codecs=vp9';
         if (!MediaRecorder.isTypeSupported(mimeType)) {
@@ -1228,6 +1299,10 @@ class STLViewerApp {
             }
 
             this.renderer.render(this.scene, this.camera);
+
+            // Composite WebGL 3D frame + top-right domain watermark onto composite canvas
+            compCtx.drawImage(this.renderer.domElement, 0, 0);
+            this.drawWatermark(compCtx, compCanvas.width, compCanvas.height, 'open-stl-file.github.io');
 
             if (progress < 1) {
                 requestAnimationFrame(animateSpin);
