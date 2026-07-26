@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
- * Complete custom rotation directions (Y-CW, Y-CCW, X-Axis, Z-Axis).
+ * Features Smart Camera Orbit Auto-Rotation starting from user's custom adjusted view angle & tilt height.
  */
 class STLViewerApp {
     constructor() {
@@ -99,6 +99,8 @@ class STLViewerApp {
         this.controls.dampingFactor = 0.05;
         this.controls.maxDistance = 1500;
         this.controls.minDistance = 1;
+        this.controls.autoRotate = false;
+        this.controls.autoRotateSpeed = 2.5;
 
         // Handle Window Resize
         window.addEventListener('resize', () => {
@@ -466,10 +468,41 @@ class STLViewerApp {
     }
 
     /**
+     * Enables or disables auto rotation, preserving user's adjusted camera angle and tilt
+     */
+    setAutoRotate(enabled) {
+        this.isAutoRotating = enabled;
+        this.updateAutoRotateState();
+    }
+
+    /**
      * Sets auto-rotation direction ('y-cw', 'y-ccw', 'x-cw', 'z-cw')
      */
     setAutoRotateDirection(dir) {
         this.autoRotateDirection = dir;
+        this.updateAutoRotateState();
+    }
+
+    /**
+     * Updates OrbitControls auto-rotate parameters based on user selected direction
+     */
+    updateAutoRotateState() {
+        if (!this.controls) return;
+
+        if (this.isAutoRotating) {
+            if (this.autoRotateDirection === 'y-cw') {
+                this.controls.autoRotate = true;
+                this.controls.autoRotateSpeed = 2.5;
+            } else if (this.autoRotateDirection === 'y-ccw') {
+                this.controls.autoRotate = true;
+                this.controls.autoRotateSpeed = -2.5;
+            } else {
+                // For X-axis pitch or Z-axis roll, use incremental mesh rotation
+                this.controls.autoRotate = false;
+            }
+        } else {
+            this.controls.autoRotate = false;
+        }
     }
 
     /**
@@ -759,7 +792,8 @@ class STLViewerApp {
     }
 
     /**
-     * Captures 360° Rotating Motion Video or Animation (WebM, MP4) with custom direction support
+     * Captures 360° Rotating Motion Video or Animation (WebM, MP4)
+     * Seamlessly starts spinning from user's custom adjusted camera view angle & tilt height!
      */
     record360Animation(options = {}) {
         const {
@@ -831,14 +865,18 @@ class STLViewerApp {
             this.showLoading(false);
         };
 
-        // Start 360 spin capture respecting user selected rotation direction
-        const startRotX = this.currentMesh.rotation.x;
-        const startRotY = this.currentMesh.rotation.y;
-        const startRotZ = this.currentMesh.rotation.z;
+        // Capture starting camera orientation (Azimuth, Polar height, Radius distance to target)
+        const startAzimuth = this.controls.getAzimuthalAngle();
+        const polar = this.controls.getPolarAngle();
+        const target = this.controls.target.clone();
+        const radius = this.camera.position.distanceTo(target);
+
+        const dir = this.autoRotateDirection;
+        const dirSign = (dir === 'y-ccw') ? -1 : 1;
 
         const startTime = performance.now();
         const wasAutoRotating = this.isAutoRotating;
-        this.isAutoRotating = false;
+        this.setAutoRotate(false);
 
         mediaRecorder.start();
 
@@ -847,26 +885,26 @@ class STLViewerApp {
             const progress = Math.min(elapsed / duration, 1);
             const fullAngle = progress * Math.PI * 2;
 
-            let rx = startRotX, ry = startRotY, rz = startRotZ;
-            const dir = this.autoRotateDirection;
-
-            if (dir === 'y-ccw') ry = startRotY - fullAngle;
-            else if (dir === 'x-cw') rx = startRotX + fullAngle;
-            else if (dir === 'z-cw') rz = startRotZ + fullAngle;
-            else ry = startRotY + fullAngle; // 'y-cw'
-
-            const applyRot = (m) => {
-                if (!m) return;
-                m.rotation.x = rx;
-                m.rotation.y = ry;
-                m.rotation.z = rz;
-            };
-
-            applyRot(this.currentMesh);
-            applyRot(this.wireframeMesh);
-            applyRot(this.edgesMesh);
-            applyRot(this.pointsMesh);
-            if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            if (dir === 'x-cw' || dir === 'z-cw') {
+                const speed = (Math.PI * 2) / (duration / 1000 * 60);
+                const applyRot = (m) => {
+                    if (!m) return;
+                    if (dir === 'x-cw') m.rotateX(speed);
+                    else if (dir === 'z-cw') m.rotateZ(speed);
+                };
+                applyRot(this.currentMesh);
+                applyRot(this.wireframeMesh);
+                applyRot(this.edgesMesh);
+                applyRot(this.pointsMesh);
+                if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            } else {
+                // Orbit camera around target starting from user's current azimuth & polar tilt height!
+                const angle = startAzimuth + dirSign * fullAngle;
+                this.camera.position.x = target.x + radius * Math.sin(polar) * Math.sin(angle);
+                this.camera.position.y = target.y + radius * Math.cos(polar);
+                this.camera.position.z = target.z + radius * Math.sin(polar) * Math.cos(angle);
+                this.camera.lookAt(target);
+            }
 
             this.renderer.render(this.scene, this.camera);
 
@@ -874,7 +912,7 @@ class STLViewerApp {
                 requestAnimationFrame(animateSpin);
             } else {
                 mediaRecorder.stop();
-                this.isAutoRotating = wasAutoRotating;
+                this.setAutoRotate(wasAutoRotating);
             }
         };
 
@@ -986,9 +1024,11 @@ class STLViewerApp {
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.key === ' ') { // Space toggles auto rotation
-                this.isAutoRotating = !this.isAutoRotating;
+                this.setAutoRotate(!this.isAutoRotating);
                 const toggle = document.getElementById('toggle-autorotate');
                 if (toggle) toggle.checked = this.isAutoRotating;
+                const rotateDirGroup = document.getElementById('auto-rotate-dir-group');
+                if (rotateDirGroup) rotateDirGroup.style.display = this.isAutoRotating ? 'block' : 'none';
             } else if (e.key.toLowerCase() === 'r') {
                 this.resetCameraView();
             } else if (e.key.toLowerCase() === 'w') {
@@ -1015,7 +1055,6 @@ class STLViewerApp {
 
     /**
      * Main Animation Render Loop
-     * Respects user chosen rotation direction (Y-CW, Y-CCW, X-Axis, Z-Axis).
      */
     animate() {
         requestAnimationFrame(this.animate);
@@ -1024,26 +1063,27 @@ class STLViewerApp {
 
         if (this.isAutoRotating && this.currentMesh) {
             const speed = this.autoRotateSpeed;
-            let dx = 0, dy = 0, dz = 0;
-
             const dir = this.autoRotateDirection;
-            if (dir === 'y-ccw') dy = -speed;
-            else if (dir === 'x-cw') dx = speed;
-            else if (dir === 'z-cw') dz = speed;
-            else dy = speed; // 'y-cw'
 
-            const rotateMesh = (m) => {
-                if (!m) return;
-                if (dx) m.rotation.x += dx;
-                if (dy) m.rotation.y += dy;
-                if (dz) m.rotation.z += dz;
-            };
-
-            rotateMesh(this.currentMesh);
-            rotateMesh(this.wireframeMesh);
-            rotateMesh(this.edgesMesh);
-            rotateMesh(this.pointsMesh);
-            if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            if (dir === 'x-cw') {
+                const applyRot = (m) => {
+                    if (m) m.rotateX(speed);
+                };
+                applyRot(this.currentMesh);
+                applyRot(this.wireframeMesh);
+                applyRot(this.edgesMesh);
+                applyRot(this.pointsMesh);
+                if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            } else if (dir === 'z-cw') {
+                const applyRot = (m) => {
+                    if (m) m.rotateZ(speed);
+                };
+                applyRot(this.currentMesh);
+                applyRot(this.wireframeMesh);
+                applyRot(this.edgesMesh);
+                applyRot(this.pointsMesh);
+                if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            }
         }
 
         this.renderer.render(this.scene, this.camera);

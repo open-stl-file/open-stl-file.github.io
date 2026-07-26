@@ -528,7 +528,7 @@
 
             if (rotateToggle) {
                 rotateToggle.addEventListener('change', (e) => {
-                    appInstance.isAutoRotating = e.target.checked;
+                    appInstance.setAutoRotate(e.target.checked);
                     if (rotateDirGroup) rotateDirGroup.style.display = e.target.checked ? 'block' : 'none';
                 });
             }
