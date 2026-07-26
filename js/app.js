@@ -31,6 +31,7 @@ class STLViewerApp {
         // Materials & Render Settings
         this.currentRenderMode = 'shaded';
         this.currentColor = '#3b82f6';
+        this.userOverrodeColor = false; // Flag indicating if user picked a custom material color
 
         // Stats & Data
         this.currentStats = null;
@@ -191,6 +192,7 @@ class STLViewerApp {
         setTimeout(() => {
             try {
                 this.disposeCurrentScene();
+                this.userOverrodeColor = false; // Reset color override flag on new model load
 
                 const startTime = performance.now();
                 const parseResult = STLParser.parse(buffer);
@@ -248,7 +250,7 @@ class STLViewerApp {
      * Renders processed Three.js geometry with lazy auxiliary meshes
      */
     renderGeometry(geometry) {
-        const hasVertexColors = !!(geometry.attributes.color);
+        const hasVertexColors = !!(geometry.attributes.color) && !this.userOverrodeColor;
 
         // Standard Material
         const material = new THREE.MeshStandardMaterial({
@@ -344,7 +346,7 @@ class STLViewerApp {
         if (this.pointsMesh) this.pointsMesh.visible = false;
 
         const clipPlanes = this.clippingEnabled ? [this.clippingPlane] : [];
-        const hasVertexColors = !!(this.currentMesh.geometry.attributes.color);
+        const hasVertexColors = !!(this.currentMesh.geometry.attributes.color) && !this.userOverrodeColor;
 
         switch (mode) {
             case 'shaded':
@@ -415,11 +417,20 @@ class STLViewerApp {
     }
 
     /**
-     * Updates model color
+     * Updates model color and forces material color update
      */
     setModelColor(hexColor) {
         this.currentColor = hexColor;
-        if (this.currentMesh && this.currentRenderMode !== 'normal') {
+        this.userOverrodeColor = true; // Set flag so custom selected color overrides preset vertex colors
+
+        if (this.currentMesh) {
+            if (this.currentMesh.material && this.currentRenderMode !== 'normal') {
+                this.currentMesh.material.vertexColors = false;
+                if (this.currentMesh.material.color) {
+                    this.currentMesh.material.color.set(hexColor);
+                }
+                this.currentMesh.material.needsUpdate = true;
+            }
             this.setRenderMode(this.currentRenderMode);
         }
     }
