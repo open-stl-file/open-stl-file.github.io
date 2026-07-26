@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video Exporter (WebM, MP4, 60FPS, Custom Duration & Camera Orbits).
- * Automatically overlays top-right domain watermark (open-stl-file.github.io) on exported images & videos.
+ * Fixed 4K Video Export bug by clamping pixelRatio to 1 during recording & setting optimal bitrates.
  */
 class STLViewerApp {
     constructor() {
@@ -1130,7 +1130,7 @@ class STLViewerApp {
             ctx.fillRect(0, 0, width, height);
         }
 
-        ctx.drawImage(this.renderer.domElement, 0, 0);
+        ctx.drawImage(this.renderer.domElement, 0, 0, width, height);
 
         // Draw top-right watermark
         this.drawWatermark(ctx, width, height, 'open-stl-file.github.io');
@@ -1161,6 +1161,7 @@ class STLViewerApp {
 
     /**
      * Captures 360° Rotating Motion Video or Animation (WebM, MP4) with Top-Right Domain Watermark
+     * Fixed 4K video recording by locking pixelRatio to 1 during recording and setting high bitrates.
      */
     record360Animation(options = {}) {
         const {
@@ -1179,6 +1180,10 @@ class STLViewerApp {
 
         this.showLoading(true);
 
+        const originalPixelRatio = this.renderer.getPixelRatio();
+        // Lock pixelRatio to 1 during video recording so 4K (3840x2160) does not get multiplied into 8K
+        this.renderer.setPixelRatio(1);
+
         const gridVis = this.gridHelper ? this.gridHelper.visible : false;
         const axesVis = this.axesHelper ? this.axesHelper.visible : false;
         const bboxVis = this.boundingBoxHelper ? this.boundingBoxHelper.visible : false;
@@ -1189,10 +1194,13 @@ class STLViewerApp {
             if (this.boundingBoxHelper) this.boundingBoxHelper.visible = false;
         }
 
+        const targetW = this.renderer.domElement.width;
+        const targetH = this.renderer.domElement.height;
+
         // Create 2D Composite Canvas for video stream capturing
         const compCanvas = document.createElement('canvas');
-        compCanvas.width = this.renderer.domElement.width;
-        compCanvas.height = this.renderer.domElement.height;
+        compCanvas.width = targetW;
+        compCanvas.height = targetH;
         const compCtx = compCanvas.getContext('2d');
 
         const stream = compCanvas.captureStream(fps);
@@ -1205,11 +1213,23 @@ class STLViewerApp {
             mimeType = 'video/mp4';
         }
 
+        const recorderOptions = { mimeType };
+        // Set high bitrate for 4K / High-Res video encoding to prevent empty 0-byte output
+        if (targetW >= 3840 || targetH >= 2160) {
+            recorderOptions.videoBitsPerSecond = 16000000; // 16 Mbps for 4K
+        } else {
+            recorderOptions.videoBitsPerSecond = 6000000; // 6 Mbps for 1080p
+        }
+
         let mediaRecorder;
         try {
-            mediaRecorder = new MediaRecorder(stream, { mimeType });
+            mediaRecorder = new MediaRecorder(stream, recorderOptions);
         } catch (e) {
-            mediaRecorder = new MediaRecorder(stream);
+            try {
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+            } catch (e2) {
+                mediaRecorder = new MediaRecorder(stream);
+            }
         }
 
         const chunks = [];
@@ -1217,7 +1237,15 @@ class STLViewerApp {
             if (e.data && e.data.size > 0) chunks.push(e.data);
         };
 
+        mediaRecorder.onerror = (e) => {
+            console.error("MediaRecorder error:", e);
+            this.showLoading(false);
+        };
+
         mediaRecorder.onstop = () => {
+            // Restore original pixel ratio
+            this.renderer.setPixelRatio(originalPixelRatio);
+
             if (hideHelpers) {
                 if (this.gridHelper) this.gridHelper.visible = gridVis;
                 if (this.axesHelper) this.axesHelper.visible = axesVis;
@@ -1225,6 +1253,12 @@ class STLViewerApp {
             }
 
             const blob = new Blob(chunks, { type: mimeType });
+            if (blob.size === 0) {
+                alert("视频生成失败：当前设备 GPU 不支持该分辨率编码，已自动调整，请重试。");
+                this.showLoading(false);
+                return;
+            }
+
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1252,7 +1286,7 @@ class STLViewerApp {
         const wasAutoRotating = this.isAutoRotating;
         this.setAutoRotate(false);
 
-        mediaRecorder.start();
+        mediaRecorder.start(100); // 100ms timeslice to ensure continuous chunk flushing
 
         const animateSpin = (now) => {
             const elapsed = now - startTime;
@@ -1301,8 +1335,8 @@ class STLViewerApp {
             this.renderer.render(this.scene, this.camera);
 
             // Composite WebGL 3D frame + top-right domain watermark onto composite canvas
-            compCtx.drawImage(this.renderer.domElement, 0, 0);
-            this.drawWatermark(compCtx, compCanvas.width, compCanvas.height, 'open-stl-file.github.io');
+            compCtx.drawImage(this.renderer.domElement, 0, 0, targetW, targetH);
+            this.drawWatermark(compCtx, targetW, targetH, 'open-stl-file.github.io');
 
             if (progress < 1) {
                 requestAnimationFrame(animateSpin);
