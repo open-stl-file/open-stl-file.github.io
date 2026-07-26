@@ -147,12 +147,16 @@
             <!-- WebGL Canvas Container -->
             <div id="canvas-container" aria-label="3D Model Rendering Viewport for Video Generation"></div>
 
-            <!-- Top Camera Angle Controls -->
+            <!-- Top Camera Angle Controls & Quick Orientation Fix -->
             <nav id="view-toolbar" class="floating-panel" aria-label="Camera Angle Presets">
                 <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="Isometric 3D View"><i class="fa-solid fa-arrows-up-to-line"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-front" title="Front Camera View"><i class="fa-solid fa-square"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-top" title="Top Camera View"><i class="fa-solid fa-border-all"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-right" title="Right Camera View"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-sm" id="btn-orient-top-z2y" style="background: rgba(245, 158, 11, 0.25); border: 1px solid var(--accent-amber); color: #fef08a; padding: 4px 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; border-radius: var(--radius-sm);" title="Fix Z-Up sideways models by standing them upright on the ground floor">
+                    <i class="fa-solid fa-arrow-up-long" style="color: #fef08a;"></i> Stand Model Upright (Z➔Y)
+                </button>
                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
                 <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="Reset Camera"><i class="fa-solid fa-rotate-left"></i></button>
             </nav>
@@ -532,6 +536,10 @@
             document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
             document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
             document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Model Orientation Calibration (Z-Up to Y-Up Fix)
+            const btnTopZ2Y = document.getElementById('btn-orient-top-z2y');
+            if (btnTopZ2Y) btnTopZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
 
             // Record 3D Video Action
             document.getElementById('btn-record-video').addEventListener('click', () => {

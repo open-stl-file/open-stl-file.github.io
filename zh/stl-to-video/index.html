@@ -195,6 +195,19 @@
                         <option value="wireframe">网格线框 (Wireframe)</option>
                         <option value="normal">表面法线颜色 Map</option>
                     </select>
+
+                    <!-- Model Orientation Calibration (Z-Up to Y-Up Fix) -->
+                    <div class="control-group" style="margin-top: 10px;">
+                        <label class="control-label" style="font-size: 12px; color: #fef08a;"><i class="fa-solid fa-arrows-spin"></i> 姿态校正 (模型摆正)</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-orient-z2y" style="flex: 1 1 100%; border-color: var(--accent-amber); color: #fef08a; font-size: 11px; padding: 5px 8px;" title="解决 CAD 软件 Z-Up 导致横躺问题，一键立起模型并贴地">
+                                <i class="fa-solid fa-arrow-up-long"></i> 一键立起模型 (Z-Up ➔ Y-Up)
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-x" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 X 轴旋转 90°">X 轴 90°</button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-y" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 Y 轴旋转 90°">Y 轴 90°</button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-z" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 Z 轴旋转 90°">Z 轴 90°</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="control-group">
@@ -537,9 +550,18 @@
             document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
             document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
 
-            // Model Orientation Calibration (Z-Up to Y-Up Fix)
+            // Model Orientation Calibration Buttons (Z-Up to Y-Up Fix)
+            const btnZ2Y = document.getElementById('btn-orient-z2y');
             const btnTopZ2Y = document.getElementById('btn-orient-top-z2y');
+            const btnRotX = document.getElementById('btn-orient-rot-x');
+            const btnRotY = document.getElementById('btn-orient-rot-y');
+            const btnRotZ = document.getElementById('btn-orient-rot-z');
+
+            if (btnZ2Y) btnZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
             if (btnTopZ2Y) btnTopZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
+            if (btnRotX) btnRotX.addEventListener('click', () => appInstance.orientGeometry('rot-x'));
+            if (btnRotY) btnRotY.addEventListener('click', () => appInstance.orientGeometry('rot-y'));
+            if (btnRotZ) btnRotZ.addEventListener('click', () => appInstance.orientGeometry('rot-z'));
 
             // Record 3D Video Action
             document.getElementById('btn-record-video').addEventListener('click', () => {

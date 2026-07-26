@@ -148,12 +148,16 @@
             <!-- WebGL Canvas Container -->
             <div id="canvas-container" aria-label="3D 模型渲染与图片生成视口"></div>
 
-            <!-- Top Camera Angle Controls -->
+            <!-- Top Camera Angle Controls & Quick Orientation Fix -->
             <nav id="view-toolbar" class="floating-panel" aria-label="视角角度控制">
                 <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="轴测 3D 视角"><i class="fa-solid fa-arrows-up-to-line"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-front" title="正视角"><i class="fa-solid fa-square"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-top" title="顶视角"><i class="fa-solid fa-border-all"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-right" title="右视角"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-sm" id="btn-orient-top-z2y" style="background: rgba(245, 158, 11, 0.25); border: 1px solid var(--accent-amber); color: #fef08a; padding: 4px 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; border-radius: var(--radius-sm);" title="解决 CAD 软件 Z-Up 导致横躺倒卧问题，一键将模型立起并吸附到地面">
+                    <i class="fa-solid fa-arrow-up-long" style="color: #fef08a;"></i> 一键立起模型 (姿态摆正)
+                </button>
                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
                 <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="复位视角"><i class="fa-solid fa-rotate-left"></i></button>
             </nav>
@@ -192,6 +196,19 @@
                         <option value="wireframe">网格线框 (Wireframe)</option>
                         <option value="normal">表面法线颜色 Map</option>
                     </select>
+
+                    <!-- Model Orientation Calibration (Z-Up to Y-Up Fix) -->
+                    <div class="control-group" style="margin-top: 10px;">
+                        <label class="control-label" style="font-size: 12px; color: #fef08a;"><i class="fa-solid fa-arrows-spin"></i> 姿态校正 (模型摆正)</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                            <button class="btn btn-sm btn-outline" id="btn-orient-z2y" style="flex: 1 1 100%; border-color: var(--accent-amber); color: #fef08a; font-size: 11px; padding: 5px 8px;" title="解决 CAD 软件 Z-Up 导致横躺问题，一键立起模型并贴地">
+                                <i class="fa-solid fa-arrow-up-long"></i> 一键立起模型 (Z-Up ➔ Y-Up)
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-x" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 X 轴旋转 90°">X 轴 90°</button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-y" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 Y 轴旋转 90°">Y 轴 90°</button>
+                            <button class="btn btn-sm btn-outline" id="btn-orient-rot-z" style="flex: 1; font-size: 10px; padding: 4px 6px;" title="绕 Z 轴旋转 90°">Z 轴 90°</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="control-group">
@@ -530,6 +547,19 @@
             document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
             document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
             document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Model Orientation Calibration Buttons (Z-Up to Y-Up Fix)
+            const btnZ2Y = document.getElementById('btn-orient-z2y');
+            const btnTopZ2Y = document.getElementById('btn-orient-top-z2y');
+            const btnRotX = document.getElementById('btn-orient-rot-x');
+            const btnRotY = document.getElementById('btn-orient-rot-y');
+            const btnRotZ = document.getElementById('btn-orient-rot-z');
+
+            if (btnZ2Y) btnZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
+            if (btnTopZ2Y) btnTopZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
+            if (btnRotX) btnRotX.addEventListener('click', () => appInstance.orientGeometry('rot-x'));
+            if (btnRotY) btnRotY.addEventListener('click', () => appInstance.orientGeometry('rot-y'));
+            if (btnRotZ) btnRotZ.addEventListener('click', () => appInstance.orientGeometry('rot-z'));
 
             // Convert & Download Action (Static Image & 360° Video)
             document.getElementById('btn-convert-download').addEventListener('click', () => {
