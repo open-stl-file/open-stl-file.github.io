@@ -3,8 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video Exporter (WebM, MP4, 60FPS, Custom Duration & Camera Orbits).
- * Features View-Relative Smart Auto Rotation: Uses user's current adjusted camera view as baseline,
- * performing Screen-Space Left/Right orbit, Up/Down pitch, and Screen-Facing roll.
+ * Features Model Orientation Calibration (姿态校正 / Z-Up转Y-Up一键摆正).
  */
 class STLViewerApp {
     constructor() {
@@ -259,6 +258,70 @@ class STLViewerApp {
                 this.showLoading(false);
             }
         }, 30);
+    }
+
+    /**
+     * Calibrates Model Orientation (Z-Up to Y-Up Fix, Rotation 90 degrees)
+     */
+    orientGeometry(type) {
+        if (!this.currentGeometry || !this.currentMesh) return;
+
+        if (type === 'z-to-y') { // Stand Upright (Rotate -90 deg on X)
+            this.currentGeometry.rotateX(-Math.PI / 2);
+        } else if (type === 'rot-x') {
+            this.currentGeometry.rotateX(Math.PI / 2);
+        } else if (type === 'rot-y') {
+            this.currentGeometry.rotateY(Math.PI / 2);
+        } else if (type === 'rot-z') {
+            this.currentGeometry.rotateZ(Math.PI / 2);
+        }
+
+        // Re-center X and Z, re-align base to ground floor (Y=0)
+        this.currentGeometry.computeBoundingBox();
+        const bbox = this.currentGeometry.boundingBox;
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+        this.currentGeometry.translate(-center.x, 0, -center.z);
+
+        this.currentGeometry.computeBoundingBox();
+        const minY = this.currentGeometry.boundingBox.min.y;
+        this.currentGeometry.translate(0, -minY, 0);
+
+        this.currentGeometry.computeBoundingBox();
+        this.currentGeometry.computeVertexNormals();
+
+        // Clear lazy meshes to force recreation with new geometry orientation
+        if (this.wireframeMesh) {
+            this.scene.remove(this.wireframeMesh);
+            if (this.wireframeMesh.geometry) this.wireframeMesh.geometry.dispose();
+            this.wireframeMesh = null;
+        }
+        if (this.edgesMesh) {
+            this.scene.remove(this.edgesMesh);
+            if (this.edgesMesh.geometry) this.edgesMesh.geometry.dispose();
+            this.edgesMesh = null;
+        }
+        if (this.pointsMesh) {
+            this.scene.remove(this.pointsMesh);
+            if (this.pointsMesh.geometry) this.pointsMesh.geometry.dispose();
+            this.pointsMesh = null;
+        }
+
+        this.setRenderMode(this.currentRenderMode);
+
+        if (this.boundingBoxHelper) {
+            this.boundingBoxHelper.update();
+        }
+
+        // Update stats
+        if (this.currentStats) {
+            const size = new THREE.Vector3();
+            this.currentGeometry.boundingBox.getSize(size);
+            this.currentStats.boundingBox.size = size;
+            this.updateUIStats(this.currentStats.parseTimeMs || 0);
+        }
+
+        this.resetCameraView();
     }
 
     /**
