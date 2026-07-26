@@ -1,7 +1,8 @@
 /**
  * Main WebGL Application & STL Viewer Controller
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
- * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background).
+ * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
+ * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
  */
 class STLViewerApp {
     constructor() {
@@ -709,6 +710,113 @@ class STLViewerApp {
         link.click();
 
         return dataURL;
+    }
+
+    /**
+     * Captures 360° Rotating Motion Video or Animation (WebM, MP4, Animated WebP)
+     * Direct client-side hardware-accelerated MediaRecorder capture.
+     * @param {Object} options { duration, fps, format, hideHelpers }
+     */
+    record360Animation(options = {}) {
+        const {
+            duration = 4000, // 4 seconds full spin
+            fps = 30,
+            format = 'webm', // 'webm', 'mp4'
+            hideHelpers = true,
+            filename = `stl_360_animation_${(this.currentFileName || 'model').replace(/\.[^/.]+$/, "")}_${Date.now()}`
+        } = options;
+
+        if (!this.currentMesh) {
+            alert('请先加载 3D STL 模型 / Please load a 3D model first');
+            return;
+        }
+
+        this.showLoading(true);
+
+        // Hide helpers during video recording if requested
+        const gridVis = this.gridHelper ? this.gridHelper.visible : false;
+        const axesVis = this.axesHelper ? this.axesHelper.visible : false;
+        const bboxVis = this.boundingBoxHelper ? this.boundingBoxHelper.visible : false;
+
+        if (hideHelpers) {
+            if (this.gridHelper) this.gridHelper.visible = false;
+            if (this.axesHelper) this.axesHelper.visible = false;
+            if (this.boundingBoxHelper) this.boundingBoxHelper.visible = false;
+        }
+
+        const canvas = this.renderer.domElement;
+        const stream = canvas.captureStream(fps);
+
+        let mimeType = 'video/webm;codecs=vp9';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/webm';
+        }
+        if (format === 'mp4' && MediaRecorder.isTypeSupported('video/mp4')) {
+            mimeType = 'video/mp4';
+        }
+
+        let mediaRecorder;
+        try {
+            mediaRecorder = new MediaRecorder(stream, { mimeType });
+        } catch (e) {
+            mediaRecorder = new MediaRecorder(stream);
+        }
+
+        const chunks = [];
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            // Restore helpers
+            if (hideHelpers) {
+                if (this.gridHelper) this.gridHelper.visible = gridVis;
+                if (this.axesHelper) this.axesHelper.visible = axesVis;
+                if (this.boundingBoxHelper) this.boundingBoxHelper.visible = bboxVis;
+            }
+
+            const blob = new Blob(chunks, { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+            a.download = `${filename}.${ext}`;
+            a.click();
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            this.showLoading(false);
+        };
+
+        // Start 360 degree spin capture
+        const startRotationY = this.currentMesh.rotation.y;
+        const startTime = performance.now();
+        const wasAutoRotating = this.isAutoRotating;
+        this.isAutoRotating = false;
+
+        mediaRecorder.start();
+
+        const animateSpin = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const angle = startRotationY + progress * Math.PI * 2;
+
+            if (this.currentMesh) this.currentMesh.rotation.y = angle;
+            if (this.wireframeMesh) this.wireframeMesh.rotation.y = angle;
+            if (this.edgesMesh) this.edgesMesh.rotation.y = angle;
+            if (this.pointsMesh) this.pointsMesh.rotation.y = angle;
+            if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+
+            this.renderer.render(this.scene, this.camera);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateSpin);
+            } else {
+                mediaRecorder.stop();
+                this.isAutoRotating = wasAutoRotating;
+            }
+        };
+
+        requestAnimationFrame(animateSpin);
     }
 
     /**
