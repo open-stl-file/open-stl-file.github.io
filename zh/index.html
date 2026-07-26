@@ -17,8 +17,8 @@
     <title>STL 在线打开与 3D 几何分析工具 | 免费 3D 打印模型在线查看器</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮、CAD 边框制图模式、三维尺寸检测、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
-    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 莫比乌斯环3D模型, 北京天坛3D模型, 工业齿轮STL, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D, 免安装3D查看器">
+    <meta name="description" content="专业免费的 STL 在线打开与 3D 查看工具。无需下载安装任何软件，直接在浏览器中拖拽打开二进制与 ASCII STL 模型文件。内置莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮、CAD 边框制图模式、三维尺寸检测、局部选区涂色着色、精准体积与表面积计算、3D 打印重量估算。数据完全本地解析，保障隐私安全。">
+    <meta name="keywords" content="STL在线打开, STL查看器, STL在线预览, 3D模型局部涂色, 3D选区着色, 莫比乌斯环3D模型, 北京天坛3D模型, 工业齿轮STL, 3D打印体积计算, STL 3D在线测量, 三维模型分析, WebGL 3D">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Viewer">
     <link rel="canonical" href="https://open-stl-file.github.io/zh/">
@@ -32,7 +32,7 @@
     <meta property="og:locale" content="zh_CN">
     <meta property="og:url" content="https://open-stl-file.github.io/zh/">
     <meta property="og:title" content="STL 在线打开与 3D 几何分析工具 - 纯浏览器本地解析">
-    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮模型、CAD 工程边框插画渲染模式、体积表面积计算。">
+    <meta property="og:description" content="免安装在线查看 STL 3D 模型，提供莫比乌斯环雕塑、北京天坛祈年殿、工业齿轮模型、3D 模型局部选区涂色、CAD 工程边框插画渲染模式。">
     <meta property="og:site_name" content="STL 3D 在线查看器">
 
     <!-- Twitter Card Meta Tags -->
@@ -51,7 +51,7 @@
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "基于 WebGL 的免费 STL 在线打开与 3D 几何分析工具。支持二进制和 ASCII 格式 STL 文件的拖拽解析、体积表面积计算、3D 打印重量估算及空间测量。",
+      "description": "基于 WebGL 的免费 STL 在线打开与 3D 几何分析工具。支持二进制和 ASCII 格式 STL 文件的拖拽解析、3D 局部选区涂色、体积表面积计算、3D 打印重量估算及空间测量。",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -61,6 +61,7 @@
         "莫比乌斯环雕塑 3D 模型",
         "北京天坛祈年殿 3D 模型",
         "工业精密齿轮 3D 模型",
+        "3D 表面局部区域/面片选区涂色着色",
         "CAD 工程边框/插画高清晰渲染模式",
         "Binary 及 ASCII 格式 STL 拖拽即开",
         "精准几何体积与表面积计算",
@@ -78,18 +79,10 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "如何在网页中在线打开 STL 3D 模型文件？",
+          "name": "如何在网页中对 STL 3D 模型进行局部区域/选区上色？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "只需直接将电脑中的 .stl 格式文件拖拽到网页任意区域，或点击顶部的'打开 STL 文件'按钮选择本地文件，本工具就会在浏览器中瞬间完成解析并呈现 3D 模型。"
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "如何切换为 CAD 边框制图/工程插画效果？",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "在左侧控制面板的'渲染模式风格'下拉菜单中选择'CAD 工程边框 (CAD Technical Edges)'即可获得高对比度黑色轮廓线条与灰色阴影结合的经典工程制图效果。"
+            "text": "在左侧控制面板的'模型材质颜色'中，将上色模式切换为'局部选区着色'，选择画刷半径（如单面片、5mm、10mm 等），然后直接用鼠标在 3D 模型表面点击即可对选中的局部区域进行精细上色。"
           }
         }
       ]
@@ -199,12 +192,40 @@
                     </select>
                 </div>
 
-                <!-- Color Selector -->
+                <!-- Color Selector with Selective Regional Area Painting Mode -->
                 <div class="control-group">
                     <div class="control-label">
                         <label for="model-color-picker"><i class="fa-solid fa-palette"></i> 模型材质颜色</label>
                         <input type="color" id="model-color-picker" value="#3b82f6" aria-label="选择自定义颜色">
                     </div>
+
+                    <!-- Color Mode Switch: Entire Model vs Regional Painting -->
+                    <div style="display: flex; gap: 6px; margin: 8px 0 6px 0;">
+                        <button class="btn btn-sm btn-primary" id="btn-color-mode-all" style="flex: 1; font-size: 11px;">
+                            <i class="fa-solid fa-fill-drip"></i> 整体着色
+                        </button>
+                        <button class="btn btn-sm btn-outline" id="btn-color-mode-paint" style="flex: 1; font-size: 11px;" title="点击模型局部表面进行着色">
+                            <i class="fa-solid fa-paint-brush"></i> 局部选区着色
+                        </button>
+                    </div>
+
+                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                            <i class="fa-solid fa-hand-pointer"></i> 提示: 点击 3D 模型表面进行局部着色
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">画刷范围:</label>
+                            <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
+                                <option value="0">单面片 (Single Facet)</option>
+                                <option value="5">5 mm 小范围</option>
+                                <option value="10" selected>10 mm 中范围</option>
+                                <option value="20">20 mm 大范围</option>
+                                <option value="50">50 mm 超大范围</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="color-picker-row" style="margin-top: 6px;">
                         <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="经典蓝色"></div>
                         <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="科技青色"></div>
@@ -454,8 +475,8 @@
                         </details>
 
                         <details class="faq-item">
-                            <summary><h4>如何切换为 CAD 边框制图/工程插画效果？</h4></summary>
-                            <p>在左侧“渲染模式风格”下拉框中选择“CAD 工程边框 (CAD Technical Edges)”，并将“背景风格”设为“明亮极简”，即可瞬间获得清晰的高对比度 CAD 工程线框插画样式。</p>
+                            <summary><h4>如何对 STL 3D 模型进行局部选区上色？</h4></summary>
+                            <p>在左侧“模型材质颜色”下方点击“局部选区着色”，选择画刷范围（如单面片或 10mm 范围），然后直接点击 3D 模型表面即可对选中局部精细涂色。</p>
                         </details>
                     </section>
                 </article>
@@ -506,6 +527,40 @@
                     appInstance.setModelColor(color);
                 });
             });
+
+            // Color Mode Controls (Entire vs Selective Area Painting)
+            const btnColorAll = document.getElementById('btn-color-mode-all');
+            const btnColorPaint = document.getElementById('btn-color-mode-paint');
+            const paintBrushControls = document.getElementById('paint-brush-controls');
+            const brushSizeSelect = document.getElementById('brush-size-select');
+
+            if (btnColorAll && btnColorPaint) {
+                btnColorAll.addEventListener('click', () => {
+                    btnColorAll.classList.add('btn-primary');
+                    btnColorAll.classList.remove('btn-outline');
+                    btnColorPaint.classList.remove('btn-primary');
+                    btnColorPaint.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'none';
+                    appInstance.setPaintMode(false);
+                });
+
+                btnColorPaint.addEventListener('click', () => {
+                    btnColorPaint.classList.add('btn-primary');
+                    btnColorPaint.classList.remove('btn-outline');
+                    btnColorAll.classList.remove('btn-primary');
+                    btnColorAll.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'block';
+                    const radius = brushSizeSelect ? brushSizeSelect.value : 10;
+                    appInstance.setBrushRadius(radius);
+                    appInstance.setPaintMode(true);
+                });
+            }
+
+            if (brushSizeSelect) {
+                brushSizeSelect.addEventListener('change', (e) => {
+                    appInstance.setBrushRadius(e.target.value);
+                });
+            }
 
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));

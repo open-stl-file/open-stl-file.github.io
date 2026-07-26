@@ -17,8 +17,8 @@
     <title>STL 转图片与 360° 动态图在线转换器 | 免费 3D STL 转 PNG / WebM / MP4 / GIF</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="免费 STL 转图片与 360 度动态图在线转换工具。无需安装 CAD 软件，直接在浏览器中将 3D STL 模型一键转换为高清 PNG、透明 PNG、360° 旋转 WebM/MP4 视频、GIF 动态图、JPG 或 WebP 图片。支持 4K 渲染与纯本地解析。">
-    <meta name="keywords" content="STL转图片, STL转PNG, STL转视频, STL 360度旋转动画, STL转WebM, STL转MP4, STL转GIF, 3D模型转2D图片, 透明PNG渲染, CAD图纸导出, 4K3D截图">
+    <meta name="description" content="免费 STL 转图片与 360 度动态图在线转换工具。无需安装 CAD 软件，直接在浏览器中将 3D STL 模型一键转换为高清 PNG、透明 PNG、360° 旋转 WebM/MP4 视频、GIF 动态图、JPG 或 WebP 图片。支持 3D 局部选区涂色、4K 渲染与纯本地解析。">
+    <meta name="keywords" content="STL转图片, STL转PNG, STL转视频, STL 360度旋转动画, STL转WebM, STL转MP4, STL转GIF, 3D模型局部着色, 透明PNG渲染, CAD图纸导出, 4K3D截图">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D 在线工具">
     <link rel="canonical" href="https://open-stl-file.github.io/zh/stl-to-image/">
@@ -51,7 +51,7 @@
       "applicationCategory": "GraphicsApplication",
       "operatingSystem": "All (Web Browser)",
       "browserRequirements": "Requires HTML5 WebGL support",
-      "description": "基于 WebGL 的免费 STL 在线转图片与动态图工具。将 3D STL 模型快速转换为高清 PNG、透明无背景 PNG、360 度旋转 WebM/MP4 视频、JPG 或 WebP 图片。支持 4K 渲染、CAD 边框风格与纯本地解析。",
+      "description": "基于 WebGL 的免费 STL 在线转图片与动态图工具。将 3D STL 模型快速转换为高清 PNG、透明无背景 PNG、360 度旋转 WebM/MP4 视频、JPG 或 WebP 图片。支持 3D 局部选区涂色、4K 渲染、CAD 边框风格与纯本地解析。",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -59,6 +59,7 @@
       },
       "featureList": [
         "STL 模型在线一键转 PNG 图片与 360 度旋转视频",
+        "3D 表面局部区域选区涂色",
         "透明背景 PNG 导出（适合电商与 PPT 设计）",
         "360 度旋转 WebM / MP4 60FPS 动画视频生成",
         "4K 超高清（3840×2160）图像渲染",
@@ -195,6 +196,34 @@
                         <label for="model-color-picker"><i class="fa-solid fa-palette"></i> 模型材质颜色</label>
                         <input type="color" id="model-color-picker" value="#3b82f6">
                     </div>
+
+                    <!-- Color Mode Switch: Entire Model vs Regional Painting -->
+                    <div style="display: flex; gap: 6px; margin: 8px 0 6px 0;">
+                        <button class="btn btn-sm btn-primary" id="btn-color-mode-all" style="flex: 1; font-size: 11px;">
+                            <i class="fa-solid fa-fill-drip"></i> 整体着色
+                        </button>
+                        <button class="btn btn-sm btn-outline" id="btn-color-mode-paint" style="flex: 1; font-size: 11px;" title="点击模型局部表面进行着色">
+                            <i class="fa-solid fa-paint-brush"></i> 局部选区着色
+                        </button>
+                    </div>
+
+                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                            <i class="fa-solid fa-hand-pointer"></i> 提示: 点击 3D 模型表面局部着色
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">画刷范围:</label>
+                            <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
+                                <option value="0">单面片 (Single Facet)</option>
+                                <option value="5">5 mm 小范围</option>
+                                <option value="10" selected>10 mm 中范围</option>
+                                <option value="20">20 mm 大范围</option>
+                                <option value="50">50 mm 超大范围</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="color-picker-row" style="margin-top: 6px;">
                         <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="经典蓝"></div>
                         <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="科技青"></div>
@@ -415,6 +444,40 @@
                 });
             });
 
+            // Color Mode Controls (Entire vs Selective Area Painting)
+            const btnColorAll = document.getElementById('btn-color-mode-all');
+            const btnColorPaint = document.getElementById('btn-color-mode-paint');
+            const paintBrushControls = document.getElementById('paint-brush-controls');
+            const brushSizeSelect = document.getElementById('brush-size-select');
+
+            if (btnColorAll && btnColorPaint) {
+                btnColorAll.addEventListener('click', () => {
+                    btnColorAll.classList.add('btn-primary');
+                    btnColorAll.classList.remove('btn-outline');
+                    btnColorPaint.classList.remove('btn-primary');
+                    btnColorPaint.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'none';
+                    appInstance.setPaintMode(false);
+                });
+
+                btnColorPaint.addEventListener('click', () => {
+                    btnColorPaint.classList.add('btn-primary');
+                    btnColorPaint.classList.remove('btn-outline');
+                    btnColorAll.classList.remove('btn-primary');
+                    btnColorAll.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'block';
+                    const radius = brushSizeSelect ? brushSizeSelect.value : 10;
+                    appInstance.setBrushRadius(radius);
+                    appInstance.setPaintMode(true);
+                });
+            }
+
+            if (brushSizeSelect) {
+                brushSizeSelect.addEventListener('change', (e) => {
+                    appInstance.setBrushRadius(e.target.value);
+                });
+            }
+
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
             document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
@@ -433,7 +496,7 @@
 
             if (rotateToggle) {
                 rotateToggle.addEventListener('change', (e) => {
-                    appInstance.isAutoRotating = e.target.checked;
+                    appInstance.setAutoRotate(e.target.checked);
                     if (rotateDirGroup) rotateDirGroup.style.display = e.target.checked ? 'block' : 'none';
                 });
             }

@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
- * Features Smart Camera Orbit Auto-Rotation starting from user's custom adjusted view angle & tilt height.
+ * Supports Selective Area / Facet Regional Color Painting (3D 局部/区域选区着色).
  */
 class STLViewerApp {
     constructor() {
@@ -33,6 +33,10 @@ class STLViewerApp {
         this.currentRenderMode = 'shaded';
         this.currentColor = '#3b82f6';
         this.userOverrodeColor = false; // Flag indicating if user picked a custom material color
+
+        // Regional Paint Mode State
+        this.paintMode = false; // Entire model vs selective regional area painting
+        this.brushRadius = 0; // 0 = Single Facet, >0 = Radius in mm
 
         // Stats & Data
         this.currentStats = null;
@@ -353,7 +357,7 @@ class STLViewerApp {
         if (this.pointsMesh) this.pointsMesh.visible = false;
 
         const clipPlanes = this.clippingEnabled ? [this.clippingPlane] : [];
-        const hasVertexColors = !!(this.currentMesh.geometry.attributes.color) && !this.userOverrodeColor;
+        const hasVertexColors = (!!(this.currentMesh.geometry.attributes.color) && !this.userOverrodeColor) || (this.currentMesh.geometry.attributes.color && this.paintMode);
         const activeColor = new THREE.Color(this.currentColor);
 
         switch (mode) {
@@ -440,19 +444,22 @@ class STLViewerApp {
     }
 
     /**
-     * Updates model color across all sub-meshes
+     * Updates model color across all sub-meshes.
+     * In entire model mode: recolors entire model.
      */
     setModelColor(hexColor) {
         this.currentColor = hexColor;
         this.userOverrodeColor = true;
 
         if (this.currentMesh) {
-            if (this.currentMesh.material && this.currentRenderMode !== 'normal') {
-                this.currentMesh.material.vertexColors = false;
-                if (this.currentMesh.material.color) {
-                    this.currentMesh.material.color.set(hexColor);
+            if (!this.paintMode) {
+                if (this.currentMesh.material && this.currentRenderMode !== 'normal') {
+                    this.currentMesh.material.vertexColors = false;
+                    if (this.currentMesh.material.color) {
+                        this.currentMesh.material.color.set(hexColor);
+                    }
+                    this.currentMesh.material.needsUpdate = true;
                 }
-                this.currentMesh.material.needsUpdate = true;
             }
         }
         if (this.wireframeMesh && this.wireframeMesh.material) {
@@ -464,7 +471,139 @@ class STLViewerApp {
             this.pointsMesh.material.needsUpdate = true;
         }
 
-        this.setRenderMode(this.currentRenderMode);
+        if (!this.paintMode) {
+            this.setRenderMode(this.currentRenderMode);
+        }
+    }
+
+    /**
+     * Sets regional paint mode on/off
+     */
+    setPaintMode(enabled) {
+        this.paintMode = enabled;
+        if (enabled && this.currentMesh) {
+            this.ensureVertexColorAttribute();
+            if (this.currentMesh.material) {
+                this.currentMesh.material.vertexColors = true;
+                this.currentMesh.material.color.set(0xffffff);
+                this.currentMesh.material.needsUpdate = true;
+            }
+        }
+    }
+
+    /**
+     * Sets paint brush radius (0 = Single facet, >0 = Radius in mm)
+     */
+    setBrushRadius(radiusMm) {
+        this.brushRadius = parseFloat(radiusMm);
+    }
+
+    /**
+     * Ensures `color` Float32Array attribute exists on BufferGeometry for regional painting
+     */
+    ensureVertexColorAttribute() {
+        const geo = this.currentGeometry;
+        if (!geo) return;
+
+        if (!geo.attributes.color) {
+            const posAttr = geo.attributes.position;
+            const colorArray = new Float32Array(posAttr.count * 3);
+            const baseColor = new THREE.Color(this.currentColor);
+
+            for (let i = 0; i < posAttr.count; i++) {
+                colorArray[i * 3] = baseColor.r;
+                colorArray[i * 3 + 1] = baseColor.g;
+                colorArray[i * 3 + 2] = baseColor.b;
+            }
+            geo.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        }
+    }
+
+    /**
+     * Handles 3D Canvas Click when Regional Paint Mode is Active
+     */
+    handlePaintClick(event) {
+        if (!this.paintMode || !this.currentMesh || !this.currentGeometry) return;
+
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObject(this.currentMesh);
+
+        if (intersects.length > 0) {
+            const hit = intersects[0];
+            this.paintRegion(hit.point, hit.faceIndex);
+        }
+    }
+
+    /**
+     * Paints selected region or facet on the 3D model
+     */
+    paintRegion(hitPoint, faceIndex) {
+        this.ensureVertexColorAttribute();
+        const geo = this.currentGeometry;
+        if (!geo || !geo.attributes.color) return;
+
+        const colorAttr = geo.attributes.color;
+        const posAttr = geo.attributes.position;
+        const paintColor = new THREE.Color(this.currentColor);
+
+        if (this.brushRadius <= 0) {
+            // Single triangle facet
+            if (faceIndex !== undefined && faceIndex !== null) {
+                const startVert = faceIndex * 3;
+                for (let i = 0; i < 3; i++) {
+                    const idx = startVert + i;
+                    colorAttr.setXYZ(idx, paintColor.r, paintColor.g, paintColor.b);
+                }
+            }
+        } else {
+            // Radius flood-fill painting around hitPoint
+            const rSq = this.brushRadius * this.brushRadius;
+            const v = new THREE.Vector3();
+
+            for (let i = 0; i < posAttr.count; i++) {
+                v.fromBufferAttribute(posAttr, i);
+                if (v.distanceToSquared(hitPoint) <= rSq) {
+                    colorAttr.setXYZ(i, paintColor.r, paintColor.g, paintColor.b);
+                }
+            }
+        }
+
+        colorAttr.needsUpdate = true;
+
+        if (this.currentMesh && this.currentMesh.material) {
+            this.currentMesh.material.vertexColors = true;
+            this.currentMesh.material.color.set(0xffffff);
+            this.currentMesh.material.needsUpdate = true;
+        }
+    }
+
+    /**
+     * Resets regional custom colors back to base uniform color
+     */
+    resetRegionalColors() {
+        if (!this.currentGeometry) return;
+        const geo = this.currentGeometry;
+        const baseColor = new THREE.Color(this.currentColor);
+
+        if (geo.attributes.color) {
+            const colorAttr = geo.attributes.color;
+            for (let i = 0; i < colorAttr.count; i++) {
+                colorAttr.setXYZ(i, baseColor.r, baseColor.g, baseColor.b);
+            }
+            colorAttr.needsUpdate = true;
+        }
+
+        if (this.currentMesh && this.currentMesh.material) {
+            if (!this.paintMode) {
+                this.currentMesh.material.vertexColors = false;
+                this.currentMesh.material.color.set(this.currentColor);
+            }
+            this.currentMesh.material.needsUpdate = true;
+        }
     }
 
     /**
@@ -793,7 +932,6 @@ class STLViewerApp {
 
     /**
      * Captures 360° Rotating Motion Video or Animation (WebM, MP4)
-     * Seamlessly starts spinning from user's custom adjusted camera view angle & tilt height!
      */
     record360Animation(options = {}) {
         const {
@@ -1016,9 +1154,15 @@ class STLViewerApp {
             });
         }
 
-        // Measurement click listener
+        // 3D Canvas Click listener for Paint Mode or Measurement Mode
         if (this.renderer && this.renderer.domElement) {
-            this.renderer.domElement.addEventListener('click', (e) => this.handleMeasurementClick(e));
+            this.renderer.domElement.addEventListener('click', (e) => {
+                if (this.paintMode) {
+                    this.handlePaintClick(e);
+                } else if (this.measureMode) {
+                    this.handleMeasurementClick(e);
+                }
+            });
         }
 
         // Keyboard Shortcuts

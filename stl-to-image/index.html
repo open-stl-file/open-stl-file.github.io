@@ -17,7 +17,7 @@
     <title>Convert STL to Image & 360° Video Online | Free STL to PNG / WebM / MP4 / GIF Converter</title>
 
     <!-- Meta Search & Keywords -->
-    <meta name="description" content="Free online STL to Image & Animation converter. Convert 3D STL files to high-resolution PNG, Transparent PNG, 360° Animated WebM/MP4 Video, JPG, or WebP images directly in your browser. Features 4K CAD rendering, studio lighting, zero upload privacy.">
+    <meta name="description" content="Free online STL to Image & Animation converter. Convert 3D STL files to high-resolution PNG, Transparent PNG, 360° Animated WebM/MP4 Video, JPG, or WebP images directly in your browser. Features 3D regional surface painting, 4K CAD rendering, studio lighting, zero upload privacy.">
     <meta name="keywords" content="stl to image, convert stl to image, stl to png, stl to video, stl 360 animation, stl to mp4, stl to webm, stl to gif, transparent png 3d model, 4k stl image generator, cad to png">
     <meta name="robots" content="index, follow">
     <meta name="author" content="STL 3D Online Tools">
@@ -61,6 +61,7 @@
         "Instant STL to PNG image conversion",
         "Transparent background PNG export for graphic design",
         "360-degree rotating WebM/MP4 3D animation video generator",
+        "Selective regional area 3D surface painting",
         "High-Resolution 4K Ultra HD (3840x2160) image rendering",
         "CAD Technical Drawing outline image style",
         "100% local client-side WebGL processing for total privacy"
@@ -195,6 +196,34 @@
                         <label for="model-color-picker"><i class="fa-solid fa-palette"></i> Model Material Color</label>
                         <input type="color" id="model-color-picker" value="#3b82f6">
                     </div>
+
+                    <!-- Color Mode Switch: Entire Model vs Regional Painting -->
+                    <div style="display: flex; gap: 6px; margin: 8px 0 6px 0;">
+                        <button class="btn btn-sm btn-primary" id="btn-color-mode-all" style="flex: 1; font-size: 11px;">
+                            <i class="fa-solid fa-fill-drip"></i> Entire Model
+                        </button>
+                        <button class="btn btn-sm btn-outline" id="btn-color-mode-paint" style="flex: 1; font-size: 11px;" title="Click 3D surface to paint selected area">
+                            <i class="fa-solid fa-paint-brush"></i> Selective Area
+                        </button>
+                    </div>
+
+                    <!-- Paint Brush Controls (shown when in Regional Paint Mode) -->
+                    <div id="paint-brush-controls" style="display: none; background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 4px;">
+                            <i class="fa-solid fa-hand-pointer"></i> Tip: Click 3D surface to paint region
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label for="brush-size-select" style="font-size: 11px; color: var(--text-muted);">Brush Radius:</label>
+                            <select id="brush-size-select" class="control-input" style="padding: 2px 6px; font-size: 11px; width: auto;">
+                                <option value="0">Single Facet</option>
+                                <option value="5">5 mm Small</option>
+                                <option value="10" selected>10 mm Medium</option>
+                                <option value="20">20 mm Large</option>
+                                <option value="50">50 mm Extra Large</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="color-picker-row" style="margin-top: 6px;">
                         <div class="color-dot" style="background: #3b82f6;" data-color="#3b82f6" title="Classic Blue"></div>
                         <div class="color-dot" style="background: #06b6d4;" data-color="#06b6d4" title="Cyan Tech"></div>
@@ -415,6 +444,40 @@
                 });
             });
 
+            // Color Mode Controls (Entire vs Selective Area Painting)
+            const btnColorAll = document.getElementById('btn-color-mode-all');
+            const btnColorPaint = document.getElementById('btn-color-mode-paint');
+            const paintBrushControls = document.getElementById('paint-brush-controls');
+            const brushSizeSelect = document.getElementById('brush-size-select');
+
+            if (btnColorAll && btnColorPaint) {
+                btnColorAll.addEventListener('click', () => {
+                    btnColorAll.classList.add('btn-primary');
+                    btnColorAll.classList.remove('btn-outline');
+                    btnColorPaint.classList.remove('btn-primary');
+                    btnColorPaint.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'none';
+                    appInstance.setPaintMode(false);
+                });
+
+                btnColorPaint.addEventListener('click', () => {
+                    btnColorPaint.classList.add('btn-primary');
+                    btnColorPaint.classList.remove('btn-outline');
+                    btnColorAll.classList.remove('btn-primary');
+                    btnColorAll.classList.add('btn-outline');
+                    if (paintBrushControls) paintBrushControls.style.display = 'block';
+                    const radius = brushSizeSelect ? brushSizeSelect.value : 10;
+                    appInstance.setBrushRadius(radius);
+                    appInstance.setPaintMode(true);
+                });
+            }
+
+            if (brushSizeSelect) {
+                brushSizeSelect.addEventListener('change', (e) => {
+                    appInstance.setBrushRadius(e.target.value);
+                });
+            }
+
             // Lighting & Background Selectors
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
             document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
@@ -433,7 +496,7 @@
 
             if (rotateToggle) {
                 rotateToggle.addEventListener('change', (e) => {
-                    appInstance.isAutoRotating = e.target.checked;
+                    appInstance.setAutoRotate(e.target.checked);
                     if (rotateDirGroup) rotateDirGroup.style.display = e.target.checked ? 'block' : 'none';
                 });
             }
