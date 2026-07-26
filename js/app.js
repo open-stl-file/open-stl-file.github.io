@@ -3,7 +3,7 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
- * Complete Fix for all Material Color Picker bugs across Shaded, CAD, Wireframe, Points, X-Ray & Solid Wireframe modes.
+ * Complete custom rotation directions (Y-CW, Y-CCW, X-Axis, Z-Axis).
  */
 class STLViewerApp {
     constructor() {
@@ -49,8 +49,10 @@ class STLViewerApp {
         // Lighting
         this.lights = {};
 
-        // Auto Rotation
+        // Auto Rotation & Custom Direction
         this.isAutoRotating = false;
+        this.autoRotateDirection = 'y-cw'; // 'y-cw', 'y-ccw', 'x-cw', 'z-cw'
+        this.autoRotateSpeed = 0.008;
 
         this.initThree();
         this.initLights();
@@ -338,7 +340,6 @@ class STLViewerApp {
 
     /**
      * Sets render mode (shaded, cad, wireframe, points, normal, xray, solid-wireframe)
-     * Seamlessly updates colors across all render modes.
      */
     setRenderMode(mode) {
         this.currentRenderMode = mode;
@@ -437,13 +438,11 @@ class STLViewerApp {
     }
 
     /**
-     * Updates model color across all active sub-meshes (shaded, wireframe, points, CAD)
+     * Updates model color across all sub-meshes
      */
     setModelColor(hexColor) {
         this.currentColor = hexColor;
         this.userOverrodeColor = true;
-
-        const activeColor = new THREE.Color(hexColor);
 
         if (this.currentMesh) {
             if (this.currentMesh.material && this.currentRenderMode !== 'normal') {
@@ -464,6 +463,13 @@ class STLViewerApp {
         }
 
         this.setRenderMode(this.currentRenderMode);
+    }
+
+    /**
+     * Sets auto-rotation direction ('y-cw', 'y-ccw', 'x-cw', 'z-cw')
+     */
+    setAutoRotateDirection(dir) {
+        this.autoRotateDirection = dir;
     }
 
     /**
@@ -692,8 +698,6 @@ class STLViewerApp {
 
     /**
      * High-Resolution Image Export (PNG / JPG / WebP)
-     * Supports 4K, 1080p, Transparent background, and custom dimensions.
-     * @param {Object} options { width, height, format, bgTransparent }
      */
     exportScreenshot(options = {}) {
         const {
@@ -755,9 +759,7 @@ class STLViewerApp {
     }
 
     /**
-     * Captures 360° Rotating Motion Video or Animation (WebM, MP4, Animated WebP)
-     * Direct client-side hardware-accelerated MediaRecorder capture.
-     * @param {Object} options { duration, fps, format, hideHelpers }
+     * Captures 360° Rotating Motion Video or Animation (WebM, MP4) with custom direction support
      */
     record360Animation(options = {}) {
         const {
@@ -829,8 +831,11 @@ class STLViewerApp {
             this.showLoading(false);
         };
 
-        // Start 360 degree spin capture
-        const startRotationY = this.currentMesh.rotation.y;
+        // Start 360 spin capture respecting user selected rotation direction
+        const startRotX = this.currentMesh.rotation.x;
+        const startRotY = this.currentMesh.rotation.y;
+        const startRotZ = this.currentMesh.rotation.z;
+
         const startTime = performance.now();
         const wasAutoRotating = this.isAutoRotating;
         this.isAutoRotating = false;
@@ -840,12 +845,27 @@ class STLViewerApp {
         const animateSpin = (now) => {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const angle = startRotationY + progress * Math.PI * 2;
+            const fullAngle = progress * Math.PI * 2;
 
-            if (this.currentMesh) this.currentMesh.rotation.y = angle;
-            if (this.wireframeMesh) this.wireframeMesh.rotation.y = angle;
-            if (this.edgesMesh) this.edgesMesh.rotation.y = angle;
-            if (this.pointsMesh) this.pointsMesh.rotation.y = angle;
+            let rx = startRotX, ry = startRotY, rz = startRotZ;
+            const dir = this.autoRotateDirection;
+
+            if (dir === 'y-ccw') ry = startRotY - fullAngle;
+            else if (dir === 'x-cw') rx = startRotX + fullAngle;
+            else if (dir === 'z-cw') rz = startRotZ + fullAngle;
+            else ry = startRotY + fullAngle; // 'y-cw'
+
+            const applyRot = (m) => {
+                if (!m) return;
+                m.rotation.x = rx;
+                m.rotation.y = ry;
+                m.rotation.z = rz;
+            };
+
+            applyRot(this.currentMesh);
+            applyRot(this.wireframeMesh);
+            applyRot(this.edgesMesh);
+            applyRot(this.pointsMesh);
             if (this.boundingBoxHelper) this.boundingBoxHelper.update();
 
             this.renderer.render(this.scene, this.camera);
@@ -995,6 +1015,7 @@ class STLViewerApp {
 
     /**
      * Main Animation Render Loop
+     * Respects user chosen rotation direction (Y-CW, Y-CCW, X-Axis, Z-Axis).
      */
     animate() {
         requestAnimationFrame(this.animate);
@@ -1002,10 +1023,26 @@ class STLViewerApp {
         this.controls.update();
 
         if (this.isAutoRotating && this.currentMesh) {
-            this.currentMesh.rotation.y += 0.008;
-            if (this.wireframeMesh) this.wireframeMesh.rotation.y += 0.008;
-            if (this.edgesMesh) this.edgesMesh.rotation.y += 0.008;
-            if (this.pointsMesh) this.pointsMesh.rotation.y += 0.008;
+            const speed = this.autoRotateSpeed;
+            let dx = 0, dy = 0, dz = 0;
+
+            const dir = this.autoRotateDirection;
+            if (dir === 'y-ccw') dy = -speed;
+            else if (dir === 'x-cw') dx = speed;
+            else if (dir === 'z-cw') dz = speed;
+            else dy = speed; // 'y-cw'
+
+            const rotateMesh = (m) => {
+                if (!m) return;
+                if (dx) m.rotation.x += dx;
+                if (dy) m.rotation.y += dy;
+                if (dz) m.rotation.z += dz;
+            };
+
+            rotateMesh(this.currentMesh);
+            rotateMesh(this.wireframeMesh);
+            rotateMesh(this.edgesMesh);
+            rotateMesh(this.pointsMesh);
             if (this.boundingBoxHelper) this.boundingBoxHelper.update();
         }
 

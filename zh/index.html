@@ -271,6 +271,17 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+
+                <!-- Custom Rotation Direction Selector -->
+                <div class="control-group" id="auto-rotate-dir-group" style="margin-top: 6px; display: none;">
+                    <label for="auto-rotate-direction" class="control-label" style="font-size: 11px; color: var(--accent-cyan);"><i class="fa-solid fa-compass"></i> 自定义旋转方向</label>
+                    <select id="auto-rotate-direction" class="control-input" style="padding: 4px 8px; font-size: 12px; border-color: var(--accent-cyan);">
+                        <option value="y-cw">Y 轴水平顺时针 (Clockwise ↷)</option>
+                        <option value="y-ccw">Y 轴水平逆时针 (Counter-Clockwise ↶)</option>
+                        <option value="x-cw">X 轴垂直俯仰翻转 (X-Axis Pitch)</option>
+                        <option value="z-cw">Z 轴平面自转 (Z-Axis Roll)</option>
+                    </select>
+                </div>
             </aside>
 
             <!-- Right Panel: Geometry Stats & Analytics Tools -->
@@ -481,7 +492,7 @@
                 appInstance.setRenderMode(e.target.value);
             });
 
-            // Color Picker (bind both input and change for cross-browser responsiveness)
+            // Color Picker
             const colorPicker = document.getElementById('model-color-picker');
             if (colorPicker) {
                 colorPicker.addEventListener('input', (e) => appInstance.setModelColor(e.target.value));
@@ -500,7 +511,7 @@
             document.getElementById('lighting-preset-select').addEventListener('change', (e) => appInstance.setLightingPreset(e.target.value));
             document.getElementById('bg-style-select').addEventListener('change', (e) => appInstance.setBackground(e.target.value));
 
-            // Toggles
+            // Toggles & Auto Rotate Controls
             document.getElementById('toggle-grid').addEventListener('change', (e) => {
                 appInstance.gridHelper.visible = e.target.checked;
             });
@@ -510,9 +521,23 @@
             document.getElementById('toggle-bbox').addEventListener('change', (e) => {
                 if (appInstance.boundingBoxHelper) appInstance.boundingBoxHelper.visible = e.target.checked;
             });
-            document.getElementById('toggle-autorotate').addEventListener('change', (e) => {
-                appInstance.isAutoRotating = e.target.checked;
-            });
+
+            const rotateToggle = document.getElementById('toggle-autorotate');
+            const rotateDirGroup = document.getElementById('auto-rotate-dir-group');
+            const rotateDirSelect = document.getElementById('auto-rotate-direction');
+
+            if (rotateToggle) {
+                rotateToggle.addEventListener('change', (e) => {
+                    appInstance.isAutoRotating = e.target.checked;
+                    if (rotateDirGroup) rotateDirGroup.style.display = e.target.checked ? 'block' : 'none';
+                });
+            }
+
+            if (rotateDirSelect) {
+                rotateDirSelect.addEventListener('change', (e) => {
+                    appInstance.setAutoRotateDirection(e.target.value);
+                });
+            }
 
             // Camera Presets
             document.getElementById('btn-cam-iso').addEventListener('click', () => appInstance.setCameraView('iso'));
