@@ -2,7 +2,7 @@
  * Main WebGL Application & STL Viewer Controller
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
- * and 360° Animated Motion Video/GIF Exporter (WebM, MP4, GIF).
+ * and 360° Animated Motion Video Exporter (WebM, MP4, 60FPS, Custom Duration & Camera Orbits).
  * Supports Selective Area / Facet Regional Color Painting with Undo / Redo History (Ctrl+Z / Ctrl+Y).
  */
 class STLViewerApp {
@@ -493,7 +493,6 @@ class STLViewerApp {
                 this.currentMesh.material.color.set(0xffffff);
                 this.currentMesh.material.needsUpdate = true;
             }
-            // Save initial state if history empty
             if (this.paintHistory.length === 0 && this.currentGeometry && this.currentGeometry.attributes.color) {
                 this.savePaintSnapshot();
             }
@@ -536,15 +535,12 @@ class STLViewerApp {
         if (!this.currentGeometry || !this.currentGeometry.attributes.color) return;
         const colorArray = this.currentGeometry.attributes.color.array;
 
-        // Truncate redo stack if needed
         if (this.paintHistoryIndex < this.paintHistory.length - 1) {
             this.paintHistory = this.paintHistory.slice(0, this.paintHistoryIndex + 1);
         }
 
-        // Clone current color array
         this.paintHistory.push(new Float32Array(colorArray));
 
-        // Limit stack size
         if (this.paintHistory.length > this.maxHistorySteps) {
             this.paintHistory.shift();
         }
@@ -629,14 +625,11 @@ class STLViewerApp {
         if (intersects.length > 0) {
             const hit = intersects[0];
 
-            // Save snapshot before paint action
             if (this.paintHistory.length === 0) {
                 this.savePaintSnapshot();
             }
 
             this.paintRegion(hit.point, hit.faceIndex);
-
-            // Save snapshot after paint action
             this.savePaintSnapshot();
         }
     }
@@ -1037,14 +1030,16 @@ class STLViewerApp {
 
     /**
      * Captures 360° Rotating Motion Video or Animation (WebM, MP4)
+     * Supports customizable Duration, FPS, Motion Style (Spin, Pitch, Roll, Zoom-Orbit)
      */
     record360Animation(options = {}) {
         const {
-            duration = 4000, // 4 seconds full spin
-            fps = 30,
+            duration = 5000, // 5 seconds
+            fps = 60, // 30 or 60 fps
             format = 'webm', // 'webm', 'mp4'
             hideHelpers = true,
-            filename = `stl_360_animation_${(this.currentFileName || 'model').replace(/\.[^/.]+$/, "")}_${Date.now()}`
+            motionStyle = 'spin', // 'spin', 'pitch', 'roll', 'zoom-orbit'
+            filename = `stl_video_${(this.currentFileName || 'model').replace(/\.[^/.]+$/, "")}_${Date.now()}`
         } = options;
 
         if (!this.currentMesh) {
@@ -1054,7 +1049,6 @@ class STLViewerApp {
 
         this.showLoading(true);
 
-        // Hide helpers during video recording if requested
         const gridVis = this.gridHelper ? this.gridHelper.visible : false;
         const axesVis = this.axesHelper ? this.axesHelper.visible : false;
         const bboxVis = this.boundingBoxHelper ? this.boundingBoxHelper.visible : false;
@@ -1089,7 +1083,6 @@ class STLViewerApp {
         };
 
         mediaRecorder.onstop = () => {
-            // Restore helpers
             if (hideHelpers) {
                 if (this.gridHelper) this.gridHelper.visible = gridVis;
                 if (this.axesHelper) this.axesHelper.visible = axesVis;
@@ -1108,11 +1101,10 @@ class STLViewerApp {
             this.showLoading(false);
         };
 
-        // Capture starting camera orientation (Azimuth, Polar height, Radius distance to target)
         const startAzimuth = this.controls.getAzimuthalAngle();
         const polar = this.controls.getPolarAngle();
         const target = this.controls.target.clone();
-        const radius = this.camera.position.distanceTo(target);
+        const baseRadius = this.camera.position.distanceTo(target);
 
         const dir = this.autoRotateDirection;
         const dirSign = (dir === 'y-ccw') ? -1 : 1;
@@ -1128,12 +1120,28 @@ class STLViewerApp {
             const progress = Math.min(elapsed / duration, 1);
             const fullAngle = progress * Math.PI * 2;
 
-            if (dir === 'x-cw' || dir === 'z-cw') {
-                const speed = (Math.PI * 2) / (duration / 1000 * 60);
+            if (motionStyle === 'zoom-orbit') {
+                // Orbit while smoothly zooming in and out
+                const angle = startAzimuth + dirSign * fullAngle;
+                const currentRadius = baseRadius * (1 + 0.25 * Math.sin(progress * Math.PI * 2));
+                this.camera.position.x = target.x + currentRadius * Math.sin(polar) * Math.sin(angle);
+                this.camera.position.y = target.y + currentRadius * Math.cos(polar);
+                this.camera.position.z = target.z + currentRadius * Math.sin(polar) * Math.cos(angle);
+                this.camera.lookAt(target);
+            } else if (dir === 'x-cw' || motionStyle === 'pitch') {
+                const speed = (Math.PI * 2) / (duration / 1000 * fps);
                 const applyRot = (m) => {
-                    if (!m) return;
-                    if (dir === 'x-cw') m.rotateX(speed);
-                    else if (dir === 'z-cw') m.rotateZ(speed);
+                    if (m) m.rotateX(speed);
+                };
+                applyRot(this.currentMesh);
+                applyRot(this.wireframeMesh);
+                applyRot(this.edgesMesh);
+                applyRot(this.pointsMesh);
+                if (this.boundingBoxHelper) this.boundingBoxHelper.update();
+            } else if (dir === 'z-cw' || motionStyle === 'roll') {
+                const speed = (Math.PI * 2) / (duration / 1000 * fps);
+                const applyRot = (m) => {
+                    if (m) m.rotateZ(speed);
                 };
                 applyRot(this.currentMesh);
                 applyRot(this.wireframeMesh);
@@ -1143,9 +1151,9 @@ class STLViewerApp {
             } else {
                 // Orbit camera around target starting from user's current azimuth & polar tilt height!
                 const angle = startAzimuth + dirSign * fullAngle;
-                this.camera.position.x = target.x + radius * Math.sin(polar) * Math.sin(angle);
-                this.camera.position.y = target.y + radius * Math.cos(polar);
-                this.camera.position.z = target.z + radius * Math.sin(polar) * Math.cos(angle);
+                this.camera.position.x = target.x + baseRadius * Math.sin(polar) * Math.sin(angle);
+                this.camera.position.y = target.y + baseRadius * Math.cos(polar);
+                this.camera.position.z = target.z + baseRadius * Math.sin(polar) * Math.cos(angle);
                 this.camera.lookAt(target);
             }
 
