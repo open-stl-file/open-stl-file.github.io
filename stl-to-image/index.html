@@ -13,7 +13,7 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Primary Title Tag optimized for high search volume keywords -->
+    <!-- Primary Title Tag -->
     <title>Convert STL to Image Online | Free STL to PNG / JPG Converter (High-Res 4K)</title>
 
     <!-- Meta Search & Keywords -->
@@ -129,6 +129,9 @@
                 <a href="../zh/stl-to-image/" class="btn btn-outline" style="text-decoration: none;" title="切换到中文版">
                     <i class="fa-solid fa-globe"></i> 中文
                 </a>
+                <button class="btn btn-outline" id="btn-toggle-seo-modal" title="View Converter Guide & FAQ">
+                    <i class="fa-solid fa-book-open"></i> Guide & FAQ
+                </button>
                 <label for="file-input" class="btn btn-primary" aria-label="Select STL 3D file for image conversion">
                     <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i> Select STL File
                 </label>
@@ -136,9 +139,9 @@
             </div>
         </header>
 
-        <!-- Main 3D Workspace -->
+        <!-- Main Full-Screen 3D Workspace -->
         <main id="workspace" role="main">
-            <!-- WebGL Canvas Container -->
+            <!-- WebGL Canvas Container (Takes 100% full screen area) -->
             <div id="canvas-container" aria-label="3D Model Rendering Viewport for Image Generation"></div>
 
             <!-- Top Camera Angle Controls -->
@@ -316,35 +319,39 @@
             </div>
         </main>
 
-        <!-- SEO Content Article & Guide -->
-        <footer style="padding: 40px 20px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--panel-border); margin-top: 20px;">
-            <div style="max-width: 1000px; margin: 0 auto; color: var(--text-muted); line-height: 1.7; font-size: 14px;">
-                <h2 style="color: var(--text-main); font-size: 22px; font-weight: 700; margin-bottom: 12px;">Convert STL to PNG & JPG Images Online Free</h2>
-                <p>
-                    Our free browser-based <strong>STL to Image Converter</strong> lets you render 3D STL models into crisp, high-resolution <strong>PNG, Transparent PNG, JPG, and WebP images</strong> instantly without installing CAD software or uploading confidential files to external servers.
-                </p>
+        <!-- SEO Content & FAQ Modal Overlay (Non-intrusive modal layout so 3D workspace takes 100% height) -->
+        <div id="seo-modal" class="modal-overlay">
+            <div class="modal-card">
+                <button class="modal-close" id="btn-close-seo-modal" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
 
-                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">Key Features</h3>
-                <ul style="padding-left: 20px; margin-bottom: 16px;">
-                    <li><strong>Transparent PNG Background:</strong> Export transparent PNG graphics for web design, e-commerce listings, and presentation slides.</li>
-                    <li><strong>High-Resolution 4K Rendering:</strong> Render crisp 3840×2160 Ultra HD 2D images directly from 3D STL geometry.</li>
-                    <li><strong>CAD Technical Edge Outlines:</strong> Generate clean vector-like engineering drawing images with bold black outlines on white backgrounds.</li>
-                    <li><strong>Custom Angles & Lighting:</strong> Adjust isometric, front, top views, studio lights, and material colors before exporting.</li>
-                </ul>
+                <article class="seo-article">
+                    <h2>Convert STL to PNG & JPG Images Online Free</h2>
+                    <p class="seo-lead">
+                        Free browser-based <strong>STL to Image Converter</strong> to render 3D STL models into <strong>PNG, Transparent PNG, JPG, and WebP images</strong> without software installation or uploading confidential files.
+                    </p>
 
-                <h3 style="color: var(--text-main); font-size: 17px; font-weight: 600; margin-top: 20px; margin-bottom: 8px;">Frequently Asked Questions</h3>
-                <div style="display: grid; gap: 12px; margin-top: 10px;">
-                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
-                        <strong style="color: var(--text-main);">Q: How do I convert STL to transparent PNG?</strong>
-                        <p style="margin-top: 4px; margin-bottom: 0;">Select "PNG Image (Transparent Background)" in the Output Format dropdown on the right panel, then click "Convert & Download Image".</p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
-                        <strong style="color: var(--text-main);">Q: Are my STL files uploaded to a server?</strong>
-                        <p style="margin-top: 4px; margin-bottom: 0;">No. All WebGL 3D rendering and image conversions take place completely inside your local browser memory. Your 3D models remain 100% private.</p>
-                    </div>
-                </div>
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li><strong>Transparent PNG Background:</strong> Export clean transparent PNG graphics for web design, e-commerce, and slides.</li>
+                        <li><strong>High-Resolution 4K Rendering:</strong> Render 3840×2160 Ultra HD images directly from 3D STL geometry.</li>
+                        <li><strong>CAD Technical Edge Outlines:</strong> Generate vector-like engineering drawing images with crisp black outlines.</li>
+                        <li><strong>Custom Angles & Studio Lighting:</strong> Adjust isometric, front, top views, and studio lighting before export.</li>
+                    </ul>
+
+                    <h3>Frequently Asked Questions (FAQ)</h3>
+                    <section class="faq-list">
+                        <details class="faq-item" open>
+                            <summary><h4>How to convert an STL file to a PNG image online?</h4></summary>
+                            <p>Select 'PNG Image (Transparent Background)' in the Output Format dropdown, choose your resolution, and click 'Convert & Download Image'.</p>
+                        </details>
+                        <details class="faq-item">
+                            <summary><h4>Are my STL files uploaded to a server?</h4></summary>
+                            <p>No. All rendering and image conversions run completely within your local browser memory for 100% privacy.</p>
+                        </details>
+                    </section>
+                </article>
             </div>
-        </footer>
+        </div>
     </div>
 
     <!-- Application Script Bindings -->
@@ -355,6 +362,19 @@
     <!-- UI Event Bindings -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // SEO Modal Controls
+            const seoModal = document.getElementById('seo-modal');
+            const openSeoBtn = document.getElementById('btn-toggle-seo-modal');
+            const closeSeoBtn = document.getElementById('btn-close-seo-modal');
+
+            if (openSeoBtn && seoModal) openSeoBtn.addEventListener('click', () => seoModal.classList.add('active'));
+            if (closeSeoBtn && seoModal) closeSeoBtn.addEventListener('click', () => seoModal.classList.remove('active'));
+            if (seoModal) {
+                seoModal.addEventListener('click', (e) => {
+                    if (e.target === seoModal) seoModal.classList.remove('active');
+                });
+            }
+
             // Sample Handlers
             document.getElementById('sample-temple').addEventListener('click', () => appInstance.loadSample('temple'));
             document.getElementById('sample-mobius').addEventListener('click', () => appInstance.loadSample('mobius'));
