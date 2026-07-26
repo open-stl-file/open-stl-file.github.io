@@ -3,7 +3,8 @@
  * Optimized for large (30MB+) STL files with lazy geometry creation & V8/GPU memory disposal.
  * Supports high-resolution Image Export (PNG/JPG/WebP, 4K, 1080p, Transparent background)
  * and 360° Animated Motion Video Exporter (WebM, MP4, 60FPS, Custom Duration & Camera Orbits).
- * Supports Selective Area / Facet Regional Color Painting with Undo / Redo History (Ctrl+Z / Ctrl+Y).
+ * Features View-Relative Smart Auto Rotation: Uses user's current adjusted camera view as baseline,
+ * performing Screen-Space Left/Right orbit, Up/Down pitch, and Screen-Facing roll.
  */
 class STLViewerApp {
     constructor() {
@@ -734,7 +735,7 @@ class STLViewerApp {
                 this.controls.autoRotate = true;
                 this.controls.autoRotateSpeed = -2.5;
             } else {
-                // For X-axis pitch or Z-axis roll, use incremental mesh rotation
+                // For Screen-space X-axis pitch or Z-axis roll, disable OrbitControls Y-orbit
                 this.controls.autoRotate = false;
             }
         } else {
@@ -1030,7 +1031,7 @@ class STLViewerApp {
 
     /**
      * Captures 360° Rotating Motion Video or Animation (WebM, MP4)
-     * Supports customizable Duration, FPS, Motion Style (Spin, Pitch, Roll, Zoom-Orbit)
+     * Uses Screen-Space Relative Axes based on User's Current Baseline View!
      */
     record360Animation(options = {}) {
         const {
@@ -1109,6 +1110,10 @@ class STLViewerApp {
         const dir = this.autoRotateDirection;
         const dirSign = (dir === 'y-ccw') ? -1 : 1;
 
+        // Calculate screen-space Camera Right & Forward axes in world space based on baseline view
+        const rightAxis = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
+        const forwardAxis = new THREE.Vector3(0, 0, 1).applyQuaternion(this.camera.quaternion);
+
         const startTime = performance.now();
         const wasAutoRotating = this.isAutoRotating;
         this.setAutoRotate(false);
@@ -1121,7 +1126,7 @@ class STLViewerApp {
             const fullAngle = progress * Math.PI * 2;
 
             if (motionStyle === 'zoom-orbit') {
-                // Orbit while smoothly zooming in and out
+                // Orbit horizontally while smoothly zooming camera distance in & out
                 const angle = startAzimuth + dirSign * fullAngle;
                 const currentRadius = baseRadius * (1 + 0.25 * Math.sin(progress * Math.PI * 2));
                 this.camera.position.x = target.x + currentRadius * Math.sin(polar) * Math.sin(angle);
@@ -1129,9 +1134,10 @@ class STLViewerApp {
                 this.camera.position.z = target.z + currentRadius * Math.sin(polar) * Math.cos(angle);
                 this.camera.lookAt(target);
             } else if (dir === 'x-cw' || motionStyle === 'pitch') {
+                // Rotate mesh around Screen-Horizontal Axis (Camera's Right Vector) -> Up/Down Pitch!
                 const speed = (Math.PI * 2) / (duration / 1000 * fps);
                 const applyRot = (m) => {
-                    if (m) m.rotateX(speed);
+                    if (m) m.rotateOnWorldAxis(rightAxis, speed);
                 };
                 applyRot(this.currentMesh);
                 applyRot(this.wireframeMesh);
@@ -1139,9 +1145,10 @@ class STLViewerApp {
                 applyRot(this.pointsMesh);
                 if (this.boundingBoxHelper) this.boundingBoxHelper.update();
             } else if (dir === 'z-cw' || motionStyle === 'roll') {
+                // Rotate mesh around Screen-Facing Forward Axis (Camera's Forward Vector) -> Screen Roll!
                 const speed = (Math.PI * 2) / (duration / 1000 * fps);
                 const applyRot = (m) => {
-                    if (m) m.rotateZ(speed);
+                    if (m) m.rotateOnWorldAxis(forwardAxis, speed);
                 };
                 applyRot(this.currentMesh);
                 applyRot(this.wireframeMesh);
@@ -1149,7 +1156,7 @@ class STLViewerApp {
                 applyRot(this.pointsMesh);
                 if (this.boundingBoxHelper) this.boundingBoxHelper.update();
             } else {
-                // Orbit camera around target starting from user's current azimuth & polar tilt height!
+                // Horizontal Left/Right Orbit starting from user's current baseline Azimuth & Polar angle
                 const angle = startAzimuth + dirSign * fullAngle;
                 this.camera.position.x = target.x + baseRadius * Math.sin(polar) * Math.sin(angle);
                 this.camera.position.y = target.y + baseRadius * Math.cos(polar);
@@ -1323,6 +1330,7 @@ class STLViewerApp {
 
     /**
      * Main Animation Render Loop
+     * Uses Screen-Space Relative Axes (Camera's Right & Forward vectors) for Up/Down and Roll rotations!
      */
     animate() {
         requestAnimationFrame(this.animate);
@@ -1334,8 +1342,10 @@ class STLViewerApp {
             const dir = this.autoRotateDirection;
 
             if (dir === 'x-cw') {
+                // Rotate around Screen Horizontal Axis (Camera's Right Vector) -> Up/Down Pitch!
+                const rightVector = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
                 const applyRot = (m) => {
-                    if (m) m.rotateX(speed);
+                    if (m) m.rotateOnWorldAxis(rightVector, speed);
                 };
                 applyRot(this.currentMesh);
                 applyRot(this.wireframeMesh);
@@ -1343,8 +1353,10 @@ class STLViewerApp {
                 applyRot(this.pointsMesh);
                 if (this.boundingBoxHelper) this.boundingBoxHelper.update();
             } else if (dir === 'z-cw') {
+                // Rotate around Screen-Facing Forward Axis (Camera's Forward Vector) -> Screen Roll!
+                const forwardVector = new THREE.Vector3(0, 0, 1).applyQuaternion(this.camera.quaternion);
                 const applyRot = (m) => {
-                    if (m) m.rotateZ(speed);
+                    if (m) m.rotateOnWorldAxis(forwardVector, speed);
                 };
                 applyRot(this.currentMesh);
                 applyRot(this.wireframeMesh);
