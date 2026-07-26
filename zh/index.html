@@ -644,6 +644,19 @@
             document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
             document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
 
+            // Model Orientation Calibration Buttons (Z-Up to Y-Up Fix)
+            const btnZ2Y = document.getElementById('btn-orient-z2y');
+            const btnTopZ2Y = document.getElementById('btn-orient-top-z2y');
+            const btnRotX = document.getElementById('btn-orient-rot-x');
+            const btnRotY = document.getElementById('btn-orient-rot-y');
+            const btnRotZ = document.getElementById('btn-orient-rot-z');
+
+            if (btnZ2Y) btnZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
+            if (btnTopZ2Y) btnTopZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
+            if (btnRotX) btnRotX.addEventListener('click', () => appInstance.orientGeometry('rot-x'));
+            if (btnRotY) btnRotY.addEventListener('click', () => appInstance.orientGeometry('rot-y'));
+            if (btnRotZ) btnRotZ.addEventListener('click', () => appInstance.orientGeometry('rot-z'));
+
             // Screenshot Export
             document.getElementById('btn-export-screenshot').addEventListener('click', () => appInstance.exportScreenshot());
 

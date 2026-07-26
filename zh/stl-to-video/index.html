@@ -147,12 +147,16 @@
             <!-- WebGL Canvas Container -->
             <div id="canvas-container" aria-label="3D 模型渲染与视频录制视口"></div>
 
-            <!-- Top Camera Angle Controls -->
+            <!-- Top Camera Angle Controls & Quick Orientation Fix -->
             <nav id="view-toolbar" class="floating-panel" aria-label="视角角度控制">
                 <button class="btn btn-icon btn-sm" id="btn-cam-iso" title="轴测 3D 视角"><i class="fa-solid fa-arrows-up-to-line"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-front" title="正视角"><i class="fa-solid fa-square"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-top" title="顶视角"><i class="fa-solid fa-border-all"></i></button>
                 <button class="btn btn-icon btn-sm" id="btn-cam-right" title="右视角"><i class="fa-solid fa-square-poll-vertical"></i></button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                <button class="btn btn-sm" id="btn-orient-top-z2y" style="background: rgba(245, 158, 11, 0.25); border: 1px solid var(--accent-amber); color: #fef08a; padding: 4px 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; border-radius: var(--radius-sm);" title="解决 CAD 软件 Z-Up 导致横躺倒卧问题，一键将模型立起并吸附到地面">
+                    <i class="fa-solid fa-arrow-up-long" style="color: #fef08a;"></i> 一键立起模型 (姿态摆正)
+                </button>
                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
                 <button class="btn btn-icon btn-sm" id="btn-cam-reset" title="复位视角"><i class="fa-solid fa-rotate-left"></i></button>
             </nav>
@@ -532,6 +536,10 @@
             document.getElementById('btn-cam-top').addEventListener('click', () => appInstance.setCameraView('top'));
             document.getElementById('btn-cam-right').addEventListener('click', () => appInstance.setCameraView('right'));
             document.getElementById('btn-cam-reset').addEventListener('click', () => appInstance.resetCameraView());
+
+            // Model Orientation Calibration (Z-Up to Y-Up Fix)
+            const btnTopZ2Y = document.getElementById('btn-orient-top-z2y');
+            if (btnTopZ2Y) btnTopZ2Y.addEventListener('click', () => appInstance.orientGeometry('z-to-y'));
 
             // Record 3D Video Action
             document.getElementById('btn-record-video').addEventListener('click', () => {
